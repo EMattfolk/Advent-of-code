@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day2.in") as f:
+with open("day02.in") as f:
     data = [l.strip() for l in f]
 
 # Function for solving the first problem

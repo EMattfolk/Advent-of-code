@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day4.in") as f:
+with open("day04.in") as f:
     data = [l.split() for l in f]
     for d in data:
         date = d[0]

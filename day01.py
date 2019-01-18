@@ -7,7 +7,7 @@ def repeat (l):
             yield i
 
 # Initialize the data
-with open("day1.in") as f:
+with open("day01.in") as f:
     data = [int(i) for i in f.read().strip().split("\n")]
 
 # Function for solving the first problem

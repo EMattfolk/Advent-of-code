@@ -3,7 +3,7 @@ from copy import deepcopy
 times = {l:60+1+i for i,l in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ")}
 
 # Initialize the data
-with open("day7.in") as f:
+with open("day07.in") as f:
     dependencies = {i:[] for i in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"}
     for i in f:
         i = i.split()

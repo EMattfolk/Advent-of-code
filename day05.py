@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day5.in") as f:
+with open("day05.in") as f:
     data = list(f.read().strip())
 backup = []
 x = [i for i in range(len(data))]

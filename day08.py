@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day8.in") as f:
+with open("day08.in") as f:
     data = [int(i) for i in f.read().strip().split()]
 
 def traverse1 (l):
