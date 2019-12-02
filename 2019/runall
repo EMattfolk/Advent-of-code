@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+for i in $@; do
+    echo -n "$i: "
+    ./$i $i.txt
+done
+
+echo

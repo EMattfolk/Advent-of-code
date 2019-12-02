@@ -50,10 +50,9 @@ int main(int argc, char** argv) {
 
     auto end = chrono::high_resolution_clock::now();
 
-    cout << "First: " << first_answer << endl
-        << "Second: " << second_answer << endl
-        << "Time: " << chrono::duration_cast<chrono::milliseconds>(end-start).count()
-        << "ms" << endl;
+    auto elapsed = chrono::duration_cast<chrono::milliseconds>(end-start).count();
+
+    cout << first_answer << ", " << second_answer << " - " << elapsed << "ms" << endl;
 
     return 0;
 }
