@@ -2,10 +2,10 @@
 #include <chrono>
 #include <string>
 #include <fstream>
-#include "collections.h"
+#include <vector>
 
 using namespace std;
-using Input = ArrayList<int>;
+using Input = vector<int>;
 using Answer = int;
 
 /*
@@ -16,7 +16,7 @@ Input get_input(const char* filename) {
     ifstream is(filename);
     int temp;
     while(is >> temp) {
-        input.append(temp);
+        input.push_back(temp);
     }
     is.close();
 
@@ -28,8 +28,8 @@ Input get_input(const char* filename) {
  */
 Answer solve_first(Input& input) {
     Answer ans = 0;
-    for (auto it = input.iter(); it.valid(); it.next()) {
-        ans += *it / 3 - 2;
+    for (int i : input) {
+        ans += i / 3 - 2;
     }
     return ans;
 }
@@ -39,9 +39,9 @@ Answer solve_first(Input& input) {
  */
 Answer solve_second(Input& input) {
     Answer ans = 0;
-    for (auto it = input.iter(); it.valid(); it.next()) {
-        while ((*it = *it / 3 - 2) >= 0) {
-            ans += *it;
+    for (int i : input) {
+        while ((i = i / 3 - 2) >= 0) {
+            ans += i;
         }
     }
     return ans;

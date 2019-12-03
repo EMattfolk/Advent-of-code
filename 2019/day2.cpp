@@ -2,10 +2,10 @@
 #include <chrono>
 #include <string>
 #include <fstream>
-#include "collections.h"
+#include <vector>
 
 using namespace std;
-using Input = ArrayList<int>;
+using Input = vector<int>;
 using Answer = int;
 
 /*
@@ -16,7 +16,7 @@ Input get_input(const char* filename) {
     ifstream is(filename);
     int temp;
     while (is >> temp) {
-        input.append(temp);
+        input.push_back(temp);
         is.ignore(1);
     }
     is.close();
@@ -40,7 +40,7 @@ Answer solve_first(Input& input, int noun=12, int verb=2) {
     Input program = input;
     program[1] = noun;
     program[2] = verb;
-    for (unsigned int i = 0; i < program.len(); i += 4) {
+    for (unsigned int i = 0; i < program.size(); i += 4) {
         if (program[i] == 1) {
             add(program[program[i+1]], program[program[i+2]], program[program[i+3]]);
         } else if (program[i] == 2) {

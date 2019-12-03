@@ -417,7 +417,7 @@ public:
 
 private:
 
-    void reserve_default();
+    void grow();
 
     void quick_sort(size_t start, size_t end);
 
@@ -477,36 +477,99 @@ private:
 template <typename K, typename V>
 class HashMap {
 public:
-    HashMap() :
-        data(new MapPair[8]),
-        hash_data(new HashPair[8]),
-        size(0),
-        max_size(8) {
+    static constexpr double LOAD_FACTOR = 0.9;
 
+    HashMap() :
+        data(nullptr),
+        hashes(nullptr),
+        size(0),
+        max_size(0),
+        resize_threshold(0) {}
+
+    ~HashMap() {
+        delete[] data;
+        delete[] hashes;
+    }
+
+    bool erase(const K& key) {
+        int index = index_of(key);
+        if (index == -1) return false;
+
+        data[index].~Element();
+        kill(hashes[index]);
+        size--;
+        return true;
+    }
+
+    void reserve(size_t new_capacity) {
+        if (new_capacity <= max_size) return;
+        size_t old_size = max_size;
+        max_size = new_capacity;
+        resize_threshold = (size_t)(max_size * LOAD_FACTOR);
+
+        Element* old_data = data;
+        size_t* old_hashes = hashes;
+
+        data = new Element[max_size];
+        hashes = new size_t[max_size];
+
+        size = 0;
+        for (size_t i = 0; i < old_size; i++) {
+            size_t hash = old_hashes[i];
+            if (!is_tomb(hash) && hash != 0) {
+                add_element(hash, old_data[i].key, old_data[i].value);
+            }
+        }
+
+        delete[] old_data;
+        delete[] old_hashes;
+    }
+
+    size_t len() {
+        return size;
     }
 
     void add(K key, V value) {
+        add_element(get_hash(key), key, value);
+    }
+
+    V& operator[](const K& key) {
+        int index = index_of(key);
+        if (index == -1) {
+            add(key, V());
+            return (*this)[key];
+        }
+
+        return data[index].value;
+    }
+
+    bool contains(K key) {
+        return index_of(key) != -1;
+    }
+
+private:
+
+    void add_element(size_t hash, K key, V value) {
+        if (size >= resize_threshold) grow();
         size_t dist = 0;
-        size_t hash = get_hash(key);
         size_t pos = desired_pos(hash);
 
         while (true) {
-            if (hash_data[pos].hash == 0) {
-                hash_data[pos].hash = hash;
-                hash_data[pos].tomb = false;
-                data[pos] = { key, value };
+            if (hashes[pos] == 0) {
+                create_element(pos, hash, key, value);
                 break;
+            } else if (hashes[pos] == hash && data[pos].key == key) {
+                data[pos].value = value;
+                return;
             }
 
-            size_t existing_dist = probe_dist(hash_data[pos].hash, pos);
+            size_t existing_dist = probe_dist(hashes[pos], pos);
             if (existing_dist < dist) {
-                if (hash_data[pos].tomb) {
-                    hash_data[pos].hash = hash;
-                    hash_data[pos].tomb = false;
-                    data[pos] = { key, value };
+                if (is_tomb(hashes[pos])) {
+                    create_element(pos, hash, key, value);
                     break;
                 }
-                std::swap(hash, hash_data[pos].hash);
+                std::swap(hash, hashes[pos]);
                 std::swap(key, data[pos].key);
                 std::swap(value, data[pos].value);
                 dist = existing_dist;
@@ -519,53 +582,36 @@ public:
         size++;
     }
 
-    bool erase(const K& key) {
-        int index = index_of(key);
-        if (index == -1) return false;
-
-        data[index].~MapPair();
-        hash_data[index].tomb = true;
-        size--;
-        return true;
+    void create_element(size_t pos, size_t hash, K key, V value) {
+        hashes[pos] = hash;
+        data[pos] = Element(key, value);
     }
 
-    void reserve(size_t new_capacity) {
-        if (new_capacity <= max_size) return;
-        max_size = new_capacity;
-
-        MapPair* old_data = data;
-        HashPair* old_hash_data = hash_data;
-
-        data = new MapPair[max_size];
-        hash_data = new HashPair[max_size];
+    void revive(size_t& hash) {
+        hash |= 1 << 30;
     }
 
-    size_t len() {
-        return size;
+    void kill(size_t& hash) {
+        hash = ~(~hash | (1 << 30));
     }
 
-    V& operator[](const K& key) {
-        return data[index_of(key)].value;
+    bool is_tomb(size_t hash) {
+        return ((hash >> 30) & 1) == 0;
     }
-
-    bool contains(K key) {
-        return index_of(key) != -1;
-    }
-
-private:
 
     int index_of(K key) {
+        if (size == 0) return -1;
         size_t hash = get_hash(key);
         size_t pos = desired_pos(hash);
         size_t dist = 0;
 
         while (true) {
-            if (hash_data[pos].hash == 0) {
+            if (hashes[pos] == 0) {
                 return -1;
-            } else if (dist > probe_dist(hash_data[pos].hash, pos)) {
+            } else if (dist > probe_dist(hashes[pos], pos)) {
                 return -1;
-            } else if (!hash_data[pos].tomb &&
-                    hash_data[pos].hash == hash &&
+            } else if (!is_tomb(hashes[pos]) &&
+                    hashes[pos] == hash &&
                     data[pos].key == key) {
                 return pos;
             }
@@ -586,27 +632,48 @@ private:
     }
 
     size_t get_hash(K key) {
-        // Make sure hash cannot be 0
+
         size_t hash = hasher(key);
-        if (!hash) return 1;
+
+        // Make sure hash cannot be 0
+        hash |= hash == 0;
+
+        revive(hash);
+
         return hash;
     }
 
-    struct MapPair {
+    void grow() {
+        if (max_size == 0)
+            reserve(COLLECTIONS_DEFAULT_CAPACITY);
+        else
+            reserve(max_size * 2);
+    }
+
+    struct Element {
         K key;
         V value;
+
+        Element() :
+            key(K()),
+            value(V()) {}
+
+        Element(K key, V value) :
+            key(key),
+            value(value) {}
+
+        ~Element() {
+            key.~K();
+            value.~V();
+        }
     };
 
-    struct HashPair {
-        size_t hash;
-        bool tomb;
-    };
-
-    MapPair* data;
-    HashPair* hash_data;
+    Element* data;
+    size_t* hashes;
     std::hash<K> hasher;
     size_t size;
     size_t max_size;
+    size_t resize_threshold;
 };
 
 //
@@ -651,13 +718,13 @@ ArrayList<T>::~ArrayList() {
 
 template <typename T>
 void ArrayList<T>::append(T value) {
-    if (size == max_size) reserve_default();
+    if (size == max_size) grow();
     data[size++] = value;
 }
 
 template <typename T>
 void ArrayList<T>::insert(size_t index, T value) {
-    if (size == max_size) reserve_default();
+    if (size == max_size) grow();
     for (size_t i = size; i > index; i--) {
         data[i] = data[i - 1];
     }
@@ -770,7 +837,7 @@ T& ArrayList<T>::value(T* data) {
 }
 
 template <typename T>
-void ArrayList<T>::reserve_default() {
+void ArrayList<T>::grow() {
     if (max_size == 0)
         reserve(COLLECTIONS_DEFAULT_CAPACITY);
     else

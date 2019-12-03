@@ -2,7 +2,7 @@
 #include <chrono>
 #include <string>
 #include <fstream>
-#include "collections.h"
+#include <vector>
 
 using namespace std;
 using Input = string;
