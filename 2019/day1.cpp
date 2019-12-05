@@ -15,7 +15,7 @@ Input get_input(const char* filename) {
     Input input;
     ifstream is(filename);
     int temp;
-    while(is >> temp) {
+    while (is >> temp) {
         input.push_back(temp);
     }
     is.close();

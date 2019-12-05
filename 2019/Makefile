@@ -1,7 +1,7 @@
-CC=g++
-CFLAGS= --std=c++17 -O2 -Wall
+CXX=g++
+CFLAGS= -O2 --std=c++17 -Wall
 
-SOURCES = $(wildcard day*.cpp)
+SOURCES = $(sort $(wildcard day*.cpp))
 RUNNABLES = $(SOURCES:day%.cpp=%)
 
 .SILENT: all run
@@ -12,8 +12,8 @@ all: $(RUNNABLES)
 run: $(RUNNABLES)
 	time -p ./runall $(RUNNABLES)
 
-$(RUNNABLES):
-	$(CC) $(CFLAGS) -o $@ day$@.cpp
+$(RUNNABLES): %: day%.cpp
+	$(CXX) $(CFLAGS) -o $@ $<
 
 clean:
-	rm $(RUNNABLES)
+	rm -f $(RUNNABLES)

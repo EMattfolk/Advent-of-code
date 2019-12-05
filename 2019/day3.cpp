@@ -4,7 +4,7 @@
 #include <fstream>
 #include <utility>
 #include <functional>
-#include <unordered_set>
+#include <unordered_map>
 #include <cmath>
 #include <vector>
 
@@ -22,7 +22,8 @@ struct Vec2 {
 template <>
 struct std::hash<Vec2> {
     size_t operator()(const Vec2& p) const {
-        return hash<int>()(p.y) * 1000 + hash<int>()(p.x);
+        hash<int> hasher;
+        return hasher(p.y) * 1000 + hasher(p.x);
     }
 };
 
@@ -56,7 +57,8 @@ void add_path(vector<Vec2>& wire, string& path) {
     }
 }
 
-unordered_set<Vec2> paths;
+unordered_map<Vec2, int> paths;
+int best_intersection = 1 << 30;
 
 /*
  * Read input from file.
@@ -72,8 +74,8 @@ Input get_input(const char* filename) {
     is.close();
 
     paths.reserve(input.first.size());
-    for (Vec2 pos : input.first) {
-        paths.insert(pos);
+    for (size_t i = 0; i < input.first.size(); i++) {
+        paths[input.first[i]] = i;
     }
 
     return input;
@@ -83,11 +85,16 @@ Input get_input(const char* filename) {
  * Solve the first problem.
  */
 Answer solve_first(Input& input) {
-    Answer ans = -1;
-    for (Vec2 pos : input.second) {
+    Answer ans = 1 << 30;
+    for (size_t i = 0; i < input.second.size(); i++) {
+        Vec2 pos = input.second[i];
         if (paths.count(pos)) {
-            int l = abs(pos.x) + abs(pos.y);
-            if (l != 0 && (ans == -1 || l < ans)) ans = l;
+            int dist = abs(pos.x) + abs(pos.y);
+            int len = i + paths[pos] + 2;
+            if (dist < ans)
+                ans = dist;
+            if (len < best_intersection)
+                best_intersection = len;
         }
     }
     return ans;
@@ -97,22 +104,7 @@ Answer solve_first(Input& input) {
  * Solve the second problem.
  */
 Answer solve_second(Input& input) {
-    Answer ans = -1;
-    for (unsigned int i = 0; i < input.second.size(); i++) {
-        Vec2 pos = input.second[i];
-        if (paths.count(pos)) {
-            for (unsigned int j = 0; j < input.first.size(); j++) {
-                if (input.first[j].x == pos.x && input.first[j].y == pos.y) {
-                    int dist = j + i + 2;
-                    if (ans == -1 || dist < ans) {
-                        ans = dist;
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
+    Answer ans = best_intersection;
     return ans;
 }
 
