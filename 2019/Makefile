@@ -1,5 +1,5 @@
 CXX=g++
-CFLAGS= -O2 --std=c++17 -Wall
+CFLAGS= -O2 -g --std=c++17 -Wall -Wpedantic
 
 SOURCES = $(sort $(wildcard day*.cpp))
 RUNNABLES = $(SOURCES:day%.cpp=%)
