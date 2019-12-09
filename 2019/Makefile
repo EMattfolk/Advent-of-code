@@ -1,19 +1,19 @@
 CXX=g++
-CFLAGS= -O2 -g --std=c++17 -Wall -Wpedantic
+CFLAGS= -O2 --std=c++17 -Wall
 
 SOURCES = $(sort $(wildcard day*.cpp))
-RUNNABLES = $(SOURCES:day%.cpp=%)
+TARGETS = $(SOURCES:day%.cpp=%)
 
 .SILENT: all run
 .PHONY: all run clean
 
-all: $(RUNNABLES)
+all: $(TARGETS)
 
-run: $(RUNNABLES)
-	time -p ./runall $(RUNNABLES)
+run: $(TARGETS)
+	time -p ./runall $(TARGETS)
 
-$(RUNNABLES): %: day%.cpp
+$(TARGETS): %: day%.cpp
 	$(CXX) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f $(RUNNABLES)
+	rm -f $(TARGETS)

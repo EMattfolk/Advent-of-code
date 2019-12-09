@@ -113,15 +113,6 @@ Answer run_program(Input& input, vector<int>& setting, unsigned int* index=nullp
     return res;
 }
 
-bool ispermutation(vector<int>& perm) {
-    for (unsigned int i = 0; i < perm.size(); i++) {
-        for (unsigned int j = i+1; j < perm.size(); j++) {
-            if (perm[i] == perm[j]) return false;
-        }
-    }
-    return true;
-}
-
 /*
  * Solve the first problem.
  */
