@@ -13,24 +13,36 @@ using namespace std;
 struct Vec2 {
     int x;
     int y;
+};
 
-    bool operator==(const Vec2& other) const {
-        return x == other.x && y == other.y;
+struct Wire {
+    Vec2 start;
+    Vec2 end;
+    int length;
+    bool horizontal;
+
+    bool crosses(const Wire& other) {
+#define CROSS(P, Q) (((P).x * (Q).y) - ((P).y * (Q).x))
+#define TO(P, Q) {((Q).x - (P).x), ((Q).y - (P).y)}
+        Vec2 ab = TO(start, end);
+        Vec2 cd = TO(other.start, other.end);
+
+        if (CROSS(ab, cd) == 0)
+            return false;
+
+        Vec2 ac = TO(start, other.start);
+
+        double s = 1.0 * CROSS(ac, cd) / CROSS(ab, cd);
+        double t = 1.0 * CROSS(ac, ab) / CROSS(ab, cd);
+
+        return s >= 0 && s <= 1 && t >= 0 && t <= 1;
     }
 };
 
-template <>
-struct std::hash<Vec2> {
-    size_t operator()(const Vec2& p) const {
-        hash<int> hasher;
-        return hasher(p.y) * 1000 + hasher(p.x);
-    }
-};
-
-using Input = pair<vector<Vec2>, vector<Vec2>>;
+using Input = pair<vector<Wire>, vector<Wire>>;
 using Answer = int;
 
-void add_path(vector<Vec2>& wire, string& path) {
+void add_path(vector<Wire>& wire, string& path) {
     Vec2 pos = { 0, 0 };
     size_t index = 0;
     while (true) {
@@ -38,26 +50,32 @@ void add_path(vector<Vec2>& wire, string& path) {
         path = path.substr(1);
         int length = stoi(path, &index);
 
-        for (int i = 0; i < length; i++) {
-            if (dir == 'U')
-                pos.y++;
-            else if (dir == 'D')
-                pos.y--;
-            else if (dir == 'L')
-                pos.x--;
-            else if (dir == 'R')
-                pos.x++;
-            else
-                cout << "Error" << endl;
+        Vec2 start = pos;
 
-            wire.push_back(pos);
+        bool horizontal;
+        if (dir == 'U') {
+            pos.y += length;
+            horizontal = false;
+        } else if (dir == 'D') {
+            pos.y -= length;
+            horizontal = false;
+        } else if (dir == 'L') {
+            pos.x -= length;
+            horizontal = true;
+        } else {
+            pos.x += length;
+            horizontal = true;
         }
+
+        Vec2 end = pos;
+
+        wire.push_back({ start, end, length, horizontal });
+
         if (index + 1 >= path.size()) break;
         path = path.substr(index + 1);
     }
 }
 
-unordered_map<Vec2, int> paths;
 int best_intersection = 1 << 30;
 
 /*
@@ -73,11 +91,6 @@ Input get_input(const char* filename) {
     add_path(input.second, temp);
     is.close();
 
-    paths.reserve(input.first.size());
-    for (size_t i = 0; i < input.first.size(); i++) {
-        paths[input.first[i]] = i;
-    }
-
     return input;
 }
 
@@ -86,16 +99,34 @@ Input get_input(const char* filename) {
  */
 Answer solve_first(Input& input) {
     Answer ans = 1 << 30;
-    for (size_t i = 0; i < input.second.size(); i++) {
-        Vec2 pos = input.second[i];
-        if (paths.count(pos)) {
-            int dist = abs(pos.x) + abs(pos.y);
-            int len = i + paths[pos] + 2;
-            if (dist < ans)
-                ans = dist;
-            if (len < best_intersection)
-                best_intersection = len;
+    int len1 = 0;
+    for (Wire wire1 : input.first) {
+        int len2 = 0;
+        for (Wire wire2 : input.second) {
+            if (wire1.crosses(wire2)) {
+                int dist;
+                int combined_length = len1 + len2;
+                Vec2 intersection;
+                if (wire1.horizontal) {
+                    intersection = { wire2.start.x, wire1.start.y };
+                    combined_length += abs(wire2.start.y - intersection.y);
+                    combined_length += abs(wire1.start.x - intersection.x);
+                } else {
+                    intersection = { wire1.start.x, wire2.start.y };
+                    combined_length += abs(wire1.start.y - intersection.y);
+                    combined_length += abs(wire2.start.x - intersection.x);
+                }
+                dist = abs(intersection.x) + abs(intersection.y);
+                if (dist < ans) {
+                    ans = dist;
+                }
+                if (combined_length < best_intersection) {
+                    best_intersection = combined_length;
+                }
+            }
+            len2 += wire2.length;
         }
+        len1 += wire1.length;
     }
     return ans;
 }
