@@ -23,10 +23,11 @@ Input get_input(const char* filename) {
     }
     is.close();
 
+    while (input.size() < 2000) input.push_back(0);
+
     return input;
 }
 
-unordered_map<uint64_t, int64_t> memory;
 uint64_t relative_base = 0;
 
 void add(int64_t a, int64_t b, int64_t& c) {
@@ -54,110 +55,60 @@ void equ(int64_t a, int64_t b, int64_t& c) {
 }
 
 int64_t& get_value(Input& program, int64_t mode, int64_t& value) {
-    if (mode == 0) {
-        if ((uint64_t)value >= program.size())
-            return memory[value];
-        return program[value];
-    }
+    if (mode == 0) return program[value];
     else if (mode == 1) return value;
-    else {
-        if (value + relative_base >= program.size())
-            return memory[relative_base + value];
-        return program[relative_base + value];
-    }
+    else return program[relative_base + value];
 }
 
 Answer run_program(Input& input, int64_t write) {
     Answer res = 0;
     Input& program = input;
-    vector<int64_t> fn_values;
-    memory.clear();
     relative_base = 0;
     uint64_t i = 0;
     while (true) {
         int64_t opcode = program[i] % 100;
-        int64_t mode = (program[i] / 100) % 10;
         if (opcode == 99) {
             break;
         }
 
-        int64_t& val = get_value(program, mode, program[i+1]);
+        int64_t mode1 = (program[i] / 100) % 10;
+        int64_t& arg1 = get_value(program, mode1, program[i+1]);
         if (opcode == 3) {
-            val = write;
+            arg1 = write;
             i += 2;
             continue;
-        }
-        if (opcode == 4) {
-            return val;
+        } else if (opcode == 4) {
+            res = arg1;
+            break;
         } else if (opcode == 9) {
-            relative_base += val;
+            relative_base += arg1;
             i += 2;
             continue;
         }
 
-        fn_values.push_back(get_value(program, mode, program[i+1]));
-        mode = (program[i] / 1000) % 10;
-        fn_values.push_back(get_value(program, mode, program[i+2]));
-
-        mode = (program[i] / 10000) % 10;
-        if (opcode == 1) {
-            uint64_t addr;
-            if (mode == 0) {
-                addr = program[i+3];
-            } else if (mode == 2) {
-                addr = relative_base + program[i+3];
-            }
-            if (addr >= program.size())
-                add(fn_values[0], fn_values[1], memory[addr]);
-            else
-                add(fn_values[0], fn_values[1], program[addr]);
-        } else if (opcode == 2) {
-            uint64_t addr;
-            if (mode == 0) {
-                addr = program[i+3];
-            } else if (mode == 2) {
-                addr = relative_base + program[i+3];
-            }
-            if (addr >= program.size())
-                mul(fn_values[0], fn_values[1], memory[addr]);
-            else
-                mul(fn_values[0], fn_values[1], program[addr]);
-        } else if (opcode == 5) {
+        int64_t mode2 = (program[i] / 1000) % 10;
+        int64_t& arg2 = get_value(program, mode2, program[i+2]);
+        if (opcode == 5) {
             i += 3;
-            jit(i, fn_values[0], fn_values[1]);
-            fn_values.clear();
+            jit(i, arg1, arg2);
             continue;
         } else if (opcode == 6) {
             i += 3;
-            jif(i, fn_values[0], fn_values[1]);
-            fn_values.clear();
+            jif(i, arg1, arg2);
             continue;
-        } else if (opcode == 7) {
-            uint64_t addr;
-            if (mode == 0) {
-                addr = program[i+3];
-            } else if (mode == 2) {
-                addr = relative_base + program[i+3];
-            }
-            if (addr >= program.size())
-                les(fn_values[0], fn_values[1], memory[addr]);
-            else
-                les(fn_values[0], fn_values[1], program[addr]);
-        } else if (opcode == 8) {
-            uint64_t addr;
-            if (mode == 0) {
-                addr = program[i+3];
-            } else if (mode == 2) {
-                addr = relative_base + program[i+3];
-            }
-            if (addr >= program.size())
-                equ(fn_values[0], fn_values[1], memory[addr]);
-            else
-                equ(fn_values[0], fn_values[1], program[addr]);
-        } else {
-            cout << "Error: opcode = " << opcode << endl;
         }
-        fn_values.clear();
+
+        uint64_t mode3 = (program[i] / 10000) % 10;
+        int64_t& arg3 = get_value(program, mode3, program[i+3]);
+        if (opcode == 1) {
+            add(arg1, arg2, arg3);
+        } else if (opcode == 2) {
+            mul(arg1, arg2, arg3);
+        } else if (opcode == 7) {
+            les(arg1, arg2, arg3);
+        } else if (opcode == 8) {
+            equ(arg1, arg2, arg3);
+        }
         i += 4;
     }
     return res;
@@ -167,14 +118,14 @@ Answer run_program(Input& input, int64_t write) {
  * Solve the first problem.
  */
 Answer solve_first(Input& input) {
-    return run_program(input,1);
+    return run_program(input, 1);
 }
 
 /*
  * Solve the second problem.
  */
 Answer solve_second(Input& input) {
-    return run_program(input,2);
+    return run_program(input, 2);
 }
 
 /*
