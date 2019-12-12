@@ -98,18 +98,14 @@ Answer solve_first(Input& input) {
 }
 
 struct State {
-    int pos[4];
-    int vel[4];
-    
-    bool operator==(const State& other) {
-        return pos[0] == other.pos[0] && pos[1] == other.pos[1] &&
-            pos[2] == other.pos[2] && pos[3] == other.pos[3] &&
-            vel[0] == other.vel[0] && vel[1] == other.vel[1] &&
-            vel[2] == other.vel[2] && vel[3] == other.vel[3];
-    }
+    int pos[4] = { 0, 0, 0, 0 };
+    int vel[4] = { 0, 0, 0, 0 };
 
     bool operator!=(const State& other) {
-        return !(*this == other);
+        return pos[0] != other.pos[0] || pos[1] != other.pos[1] ||
+            pos[2] != other.pos[2] || pos[3] != other.pos[3] ||
+            vel[0] != other.vel[0] || vel[1] != other.vel[1] ||
+            vel[2] != other.vel[2] || vel[3] != other.vel[3];
     }
 
     void next() {
@@ -130,25 +126,6 @@ struct State {
     }
 };
 
-bool operator==(State me, State other) {
-    return me.pos[0] == other.pos[0] && me.pos[1] == other.pos[1] &&
-        me.pos[2] == other.pos[2] && me.pos[3] == other.pos[3] &&
-        me.vel[0] == other.vel[0] && me.vel[1] == other.vel[1] &&
-        me.vel[2] == other.vel[2] && me.vel[3] == other.vel[3];
-}
-
-namespace std {
-template <>
-struct hash<State>
-{
-    size_t operator()(const State& k) const
-    {
-        return k.pos[0] ^ (k.pos[1] << 1) ^ (k.pos[2] << 2) ^ (k.pos[3] << 3) ^
-            (k.vel[0] << 4) ^ (k.vel[1] << 5) ^ (k.vel[2] << 6) ^ (k.vel[3] << 7);
-    }
-};
-}
-
 uint64_t gcd(uint64_t a, uint64_t b) {
     if (b == 0) return a;
     return gcd(b, a % b);
@@ -164,17 +141,13 @@ Answer solve_second(Input& input) {
     statex.pos[1] = input[1].x;
     statex.pos[2] = input[2].x;
     statex.pos[3] = input[3].x;
-    statex.vel[0] = input[0].xv;
-    statex.vel[1] = input[1].xv;
-    statex.vel[2] = input[2].xv;
-    statex.vel[3] = input[3].xv;
     State init_state = statex;
 
     uint64_t lengthx = 0;
-    while (statex != init_state || lengthx == 0) {
+    do {
         statex.next();
         lengthx++;
-    }
+    } while (statex != init_state);
 
 
     State statey;
@@ -182,34 +155,26 @@ Answer solve_second(Input& input) {
     statey.pos[1] = input[1].y;
     statey.pos[2] = input[2].y;
     statey.pos[3] = input[3].y;
-    statey.vel[0] = input[0].yv;
-    statey.vel[1] = input[1].yv;
-    statey.vel[2] = input[2].yv;
-    statey.vel[3] = input[3].yv;
     init_state = statey;
 
     uint64_t lengthy = 0;
-    while (statey != init_state || lengthy == 0) {
+    do {
         statey.next();
         lengthy++;
-    }
+    } while (statey != init_state);
 
     State statez;
     statez.pos[0] = input[0].z;
     statez.pos[1] = input[1].z;
     statez.pos[2] = input[2].z;
     statez.pos[3] = input[3].z;
-    statez.vel[0] = input[0].zv;
-    statez.vel[1] = input[1].zv;
-    statez.vel[2] = input[2].zv;
-    statez.vel[3] = input[3].zv;
     init_state = statez;
 
     uint64_t lengthz = 0;
-    while (statez != init_state || lengthz == 0) {
+    do {
         statez.next();
         lengthz++;
-    }
+    } while (statez != init_state);
 
     Answer ans = lengthx * lengthy * lengthz;
 
