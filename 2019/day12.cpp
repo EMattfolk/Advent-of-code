@@ -108,6 +108,10 @@ struct State {
             vel[2] == other.vel[2] && vel[3] == other.vel[3];
     }
 
+    bool operator!=(const State& other) {
+        return !(*this == other);
+    }
+
     void next() {
         for (int i = 0; i < 4; i++) {
             for (int j = i+1; j < 4; j++) {
@@ -154,6 +158,7 @@ uint64_t gcd(uint64_t a, uint64_t b) {
  * Solve the second problem.
  */
 Answer solve_second(Input& input) {
+
     State statex;
     statex.pos[0] = input[0].x;
     statex.pos[1] = input[1].x;
@@ -163,14 +168,12 @@ Answer solve_second(Input& input) {
     statex.vel[1] = input[1].xv;
     statex.vel[2] = input[2].xv;
     statex.vel[3] = input[3].xv;
+    State init_state = statex;
 
-    vector<State> statesx;
-    unordered_map<State, uint32_t> foundstates;
-    uint32_t i = 0;
-    while (foundstates.count(statex) == 0) {
-        statesx.push_back(statex);
-        foundstates[statex] = i++;
+    uint64_t lengthx = 0;
+    while (statex != init_state || lengthx == 0) {
         statex.next();
+        lengthx++;
     }
 
 
@@ -183,14 +186,12 @@ Answer solve_second(Input& input) {
     statey.vel[1] = input[1].yv;
     statey.vel[2] = input[2].yv;
     statey.vel[3] = input[3].yv;
+    init_state = statey;
 
-    vector<State> statesy;
-    foundstates.clear();
-    i = 0;
-    while (foundstates.count(statey) == 0) {
-        statesy.push_back(statey);
-        foundstates[statey] = i++;
+    uint64_t lengthy = 0;
+    while (statey != init_state || lengthy == 0) {
         statey.next();
+        lengthy++;
     }
 
     State statez;
@@ -202,18 +203,17 @@ Answer solve_second(Input& input) {
     statez.vel[1] = input[1].zv;
     statez.vel[2] = input[2].zv;
     statez.vel[3] = input[3].zv;
+    init_state = statez;
 
-    vector<State> statesz;
-    foundstates.clear();
-    i = 0;
-    while (foundstates.count(statez) == 0) {
-        statesz.push_back(statez);
-        foundstates[statez] = i++;
+    uint64_t lengthz = 0;
+    while (statez != init_state || lengthz == 0) {
         statez.next();
+        lengthz++;
     }
 
-    Answer ans = statesx.size() * statesy.size() * statesz.size();
-    uint64_t d = gcd(statesx.size(), gcd(statesy.size(), statesz.size()));
+    Answer ans = lengthx * lengthy * lengthz;
+
+    uint64_t d = gcd(lengthx, gcd(lengthy, lengthz));
     ans /= d*d;
 
     return ans;
