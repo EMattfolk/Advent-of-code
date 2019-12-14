@@ -7,10 +7,13 @@
 #include <cstdint>
 
 using namespace std;
-using Input = unordered_map<string, vector<pair<int, string>>>;
+using Input = vector<vector<pair<int, int>>>;
 using Answer = int64_t;
 
-unordered_map<string, pair<int64_t, int64_t>> produce_table;
+vector<pair<int64_t, int64_t>> produce_table;
+
+int FUEL = 0;
+int ORE = 0;
 
 /*
  * Read input from file.
@@ -25,31 +28,48 @@ Input get_input(const char* filename) {
     int length = is.tellg();
     is.seekg(0, is.beg);
 
+    unordered_map<string, int> translation;
+    int index = 0;
+
     while (length - is.tellg() > 1) {
-        vector<pair<int, string>> req;
+        vector<pair<int, int>> req;
         bool req_done = false;
         while (!req_done) {
             is >> count;
             is >> elem;
             if (elem[elem.size()-1] == ',') {
-                req.push_back({ count, elem.substr(0, elem.size()-1) });
+                elem = elem.substr(0, elem.size()-1);
             } else {
-                req.push_back({ count, elem });
                 req_done = true;
             }
+
+            if (translation.count(elem) == 0) {
+                translation[elem] = index++;
+                input.push_back(vector<pair<int, int>>());
+                produce_table.push_back({ 0, 0 });
+            }
+            req.push_back({ count, translation[elem] });
         }
         is >> elem;
         is >> count;
         is >> elem;
-        input[elem] = req;
-        produce_table[elem] = { count, 0 };
+        if (translation.count(elem) == 0) {
+            translation[elem] = index++;
+            input.push_back(vector<pair<int, int>>());
+            produce_table.push_back({ 0, 0 });
+        }
+        input[translation[elem]] = req;
+        produce_table[translation[elem]] = { count, 0 };
     }
     is.close();
+
+    FUEL = translation["FUEL"];
+    ORE = translation["ORE"];
 
     return input;
 }
 
-int64_t produce_element(Input& input, int64_t count, string elem) {
+int64_t produce_element(Input& input, int64_t count, int elem) {
     int64_t to_produce = count - produce_table[elem].second;
     int64_t cycles = 0;
     if (to_produce > 0) {
@@ -65,11 +85,9 @@ int64_t produce_element(Input& input, int64_t count, string elem) {
 
     int64_t ores = 0;
     if (to_produce) {
-        for (pair<int, string>& ingredient : input[elem]) {
-            //cout << ingredient.second << endl;
+        for (pair<int, int>& ingredient : input[elem]) {
             int64_t amount = cycles * ingredient.first;
-            //cout << amount << endl;
-            if (ingredient.second == "ORE") {
+            if (ingredient.second == ORE) {
                 ores += amount;
             } else {
                 ores += produce_element(input, amount, ingredient.second);
@@ -87,9 +105,9 @@ int64_t produce_element(Input& input, int64_t count, string elem) {
 /*
  * Solve the first problem.
  */
-Answer solve_first(Input& input, int64_t fuel=1) {
+Answer solve_first(Input& input, int64_t count=1) {
     auto ptable = produce_table;
-    Answer ans = produce_element(input, fuel, "FUEL");
+    Answer ans = produce_element(input, count, FUEL);
     produce_table = ptable;
     return ans;
 }
@@ -99,8 +117,8 @@ Answer solve_first(Input& input, int64_t fuel=1) {
  */
 Answer solve_second(Input& input) {
     int64_t lower = 0;
-    int64_t upper = 1000000000000;
-    while (lower != upper && lower + 1 != upper) {
+    int64_t upper = 2000000000000 / solve_first(input, 1);
+    while (lower + 1 != upper) {
         int64_t err = 1000000000000 - solve_first(input, (lower + upper) / 2);
         if (err < 0) {
             upper = (upper + lower) / 2;
@@ -109,14 +127,7 @@ Answer solve_second(Input& input) {
         }
     }
 
-    Answer ans;
-    if (solve_first(input, upper) > 1000000000000) {
-        ans = lower;
-    } else {
-        ans = upper;
-    }
-
-    return ans;
+    return lower;
 }
 
 /*
