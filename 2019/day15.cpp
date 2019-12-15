@@ -32,90 +32,97 @@ Input get_input(const char* filename) {
     return input;
 }
 
-uint64_t relative_base = 0;
-uint64_t program_index = 0;
+class IntCode {
+public:
 
-void add(int64_t a, int64_t b, int64_t& c) {
-    c = a + b;
-}
+    IntCode(vector<int64_t>& program) : program(program) {}
 
-void mul(int64_t a, int64_t b, int64_t& c) {
-    c = a * b;
-}
+    int64_t run(int64_t input) {
+        int64_t res = 0;
+        while (true) {
+            int64_t opcode = program[program_index] % 100;
+            if (opcode == 99) {
+                return -1;
+            }
 
-void jit(uint64_t& instr, int64_t a, int64_t b) {
-    if (a) instr = b;
-}
+            int64_t mode1 = (program[program_index] / 100) % 10;
+            int64_t& arg1 = get_value(program, mode1, program[program_index+1]);
+            if (opcode == 3) {
+                arg1 = input;
+                program_index += 2;
+                continue;
+            } else if (opcode == 4) {
+                res = arg1;
+                program_index += 2;
+                break;
+            } else if (opcode == 9) {
+                relative_base += arg1;
+                program_index += 2;
+                continue;
+            }
 
-void jif(uint64_t& instr, int64_t a, int64_t b) {
-    if (!a) instr = b;
-}
+            int64_t mode2 = (program[program_index] / 1000) % 10;
+            int64_t& arg2 = get_value(program, mode2, program[program_index+2]);
+            if (opcode == 5) {
+                program_index += 3;
+                jit(program_index, arg1, arg2);
+                continue;
+            } else if (opcode == 6) {
+                program_index += 3;
+                jif(program_index, arg1, arg2);
+                continue;
+            }
 
-void les(int64_t a, int64_t b, int64_t& c) {
-    c = a < b;
-}
-
-void equ(int64_t a, int64_t b, int64_t& c) {
-    c = a == b;
-}
-
-int64_t& get_value(Input& program, int64_t mode, int64_t& value) {
-    if (mode == 0) return program[value];
-    else if (mode == 1) return value;
-    else return program[relative_base + value];
-}
-
-Answer run_program(Input& program, int64_t write) {
-    Answer res = 0;
-    while (true) {
-        int64_t opcode = program[program_index] % 100;
-        if (opcode == 99) {
-            return -1;
+            uint64_t mode3 = (program[program_index] / 10000) % 10;
+            int64_t& arg3 = get_value(program, mode3, program[program_index+3]);
+            if (opcode == 1) {
+                add(arg1, arg2, arg3);
+            } else if (opcode == 2) {
+                mul(arg1, arg2, arg3);
+            } else if (opcode == 7) {
+                les(arg1, arg2, arg3);
+            } else if (opcode == 8) {
+                equ(arg1, arg2, arg3);
+            }
+            program_index += 4;
         }
-
-        int64_t mode1 = (program[program_index] / 100) % 10;
-        int64_t& arg1 = get_value(program, mode1, program[program_index+1]);
-        if (opcode == 3) {
-            arg1 = write;
-            program_index += 2;
-            continue;
-        } else if (opcode == 4) {
-            res = arg1;
-            program_index += 2;
-            break;
-        } else if (opcode == 9) {
-            relative_base += arg1;
-            program_index += 2;
-            continue;
-        }
-
-        int64_t mode2 = (program[program_index] / 1000) % 10;
-        int64_t& arg2 = get_value(program, mode2, program[program_index+2]);
-        if (opcode == 5) {
-            program_index += 3;
-            jit(program_index, arg1, arg2);
-            continue;
-        } else if (opcode == 6) {
-            program_index += 3;
-            jif(program_index, arg1, arg2);
-            continue;
-        }
-
-        uint64_t mode3 = (program[program_index] / 10000) % 10;
-        int64_t& arg3 = get_value(program, mode3, program[program_index+3]);
-        if (opcode == 1) {
-            add(arg1, arg2, arg3);
-        } else if (opcode == 2) {
-            mul(arg1, arg2, arg3);
-        } else if (opcode == 7) {
-            les(arg1, arg2, arg3);
-        } else if (opcode == 8) {
-            equ(arg1, arg2, arg3);
-        }
-        program_index += 4;
+        return res;
     }
-    return res;
-}
+
+    int64_t& get_value(Input& program, int64_t mode, int64_t& value) {
+        if (mode == 0) return program[value];
+        else if (mode == 1) return value;
+        else return program[relative_base + value];
+    }
+
+    void add(int64_t a, int64_t b, int64_t& c) {
+        c = a + b;
+    }
+
+    void mul(int64_t a, int64_t b, int64_t& c) {
+        c = a * b;
+    }
+
+    void jit(uint64_t& instr, int64_t a, int64_t b) {
+        if (a) instr = b;
+    }
+
+    void jif(uint64_t& instr, int64_t a, int64_t b) {
+        if (!a) instr = b;
+    }
+
+    void les(int64_t a, int64_t b, int64_t& c) {
+        c = a < b;
+    }
+
+    void equ(int64_t a, int64_t b, int64_t& c) {
+        c = a == b;
+    }
+
+    vector<int64_t> program;
+    uint64_t relative_base = 0;
+    uint64_t program_index = 0;
+};
 
 uint64_t pairhash(const pair<int, int>& pos) {
     const pair<int, int>* addr = &pos;
@@ -127,14 +134,14 @@ pair<int, int> pairunhash(const uint64_t& pos) {
     return *((pair<int, int>*)addr);
 }
 
-int dir_to_code(pair<int, int> dir) {
+int dir_to_code(const pair<int, int>& dir) {
     if (dir.second == 1) return 1;
     else if (dir.second == -1) return 2;
     else if (dir.first == -1) return 3;
     else return 4;
 }
 
-pair<int, int> rotate_dir(pair<int, int> dir) {
+pair<int, int> rotate_dir(const pair<int, int>& dir) {
     return { -dir.second, dir.first };
 }
 
@@ -143,7 +150,7 @@ vector<pair<int, int>> dirs = {{ 0, 1 }, { 0, -1 }, { -1, 0 }, { 1, 0 }};
 pair<int, int> oxygen = { 0, 0 };
 unordered_map<uint64_t, int> map;
 
-int traverse(Input& input,
+int traverse(IntCode& program,
         unordered_set<uint64_t>& visited,
         pair<int, int> pos,
         pair<int, int> from_dir,
@@ -156,7 +163,7 @@ int traverse(Input& input,
     for (auto& dir : dirs) {
         pair<int, int> new_pos = { pos.first + dir.first, pos.second + dir.second };
         if (visited.count(pairhash(new_pos))) continue;
-        int tile = run_program(input, dir_to_code(dir));
+        int tile = program.run(dir_to_code(dir));
         map[pairhash(new_pos)] = tile;
 
         if (tile == 0) continue;
@@ -165,11 +172,11 @@ int traverse(Input& input,
             res = depth + 1;
         }
 
-        int d = traverse(input, visited, new_pos, dir, depth+1);
+        int d = traverse(program, visited, new_pos, dir, depth+1);
         if (d != -1) res = d;
     }
 
-    run_program(input, dir_to_code(rotate_dir(rotate_dir(from_dir))));
+    program.run(dir_to_code(rotate_dir(rotate_dir(from_dir))));
     return res;
 }
 
@@ -177,13 +184,13 @@ int traverse(Input& input,
  * Solve the first problem.
  */
 Answer solve_first(Input& input) {
-    Input program = input;
+    IntCode program(input);
     unordered_set<uint64_t> visited;
-    Answer ans = traverse(input, visited, { 0, 0 }, { 0, 0 });
+    Answer ans = traverse(program, visited, { 0, 0 }, { 0, 0 });
 
 #ifdef OUTPUT
     string grid(51*51, ' ');
-    for (int i = 50; i < grid.size(); i += 51) grid[i] = '\n';
+    for (uint64_t i = 50; i < grid.size(); i += 51) grid[i] = '\n';
     for (auto& p : map) {
         pair<int, int> pos = pairunhash(p.first);
         grid[(pos.second + 25) * 51 + (pos.first + 25)] =
