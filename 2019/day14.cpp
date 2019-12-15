@@ -10,6 +10,7 @@ using namespace std;
 using Input = vector<vector<pair<int, int>>>;
 using Answer = int64_t;
 
+// [(amount produced in one cycle, current amount), ..]
 vector<pair<int64_t, int64_t>> produce_table;
 
 int FUEL = 0;
@@ -24,14 +25,15 @@ Input get_input(const char* filename) {
     string elem;
     int count;
 
-    is.seekg(0, is.end);
-    int length = is.tellg();
-    is.seekg(0, is.beg);
-
     unordered_map<string, int> translation;
-    int index = 0;
 
-    while (length - is.tellg() > 1) {
+    auto add_translation = [&translation, &input](string& elem) {
+        translation[elem] = input.size();
+        input.push_back(vector<pair<int, int>>());
+        produce_table.push_back({ 0, 0 });
+    };
+
+    while (is >> ws && !is.eof()) {
         vector<pair<int, int>> req;
         bool req_done = false;
         while (!req_done) {
@@ -43,24 +45,19 @@ Input get_input(const char* filename) {
                 req_done = true;
             }
 
-            if (translation.count(elem) == 0) {
-                translation[elem] = index++;
-                input.push_back(vector<pair<int, int>>());
-                produce_table.push_back({ 0, 0 });
-            }
+            if (translation.count(elem) == 0) add_translation(elem);
             req.push_back({ count, translation[elem] });
         }
+
         is >> elem;
         is >> count;
         is >> elem;
-        if (translation.count(elem) == 0) {
-            translation[elem] = index++;
-            input.push_back(vector<pair<int, int>>());
-            produce_table.push_back({ 0, 0 });
-        }
+
+        if (translation.count(elem) == 0) add_translation(elem);
         input[translation[elem]] = req;
         produce_table[translation[elem]] = { count, 0 };
     }
+
     is.close();
 
     FUEL = translation["FUEL"];
@@ -106,9 +103,12 @@ int64_t produce_element(Input& input, int64_t count, int elem) {
  * Solve the first problem.
  */
 Answer solve_first(Input& input, int64_t count=1) {
-    auto ptable = produce_table;
     Answer ans = produce_element(input, count, FUEL);
-    produce_table = ptable;
+
+    for (pair<int64_t, int64_t>& p : produce_table) {
+        p.second = 0;
+    }
+
     return ans;
 }
 
