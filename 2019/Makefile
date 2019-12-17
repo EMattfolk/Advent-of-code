@@ -1,5 +1,5 @@
-CXX=g++
-CFLAGS= -O2 --std=c++17 -Wall
+CXX=clang++
+CFLAGS= -O3 --std=c++17 -Wall
 
 SOURCES = $(sort $(wildcard day*.cpp))
 TARGETS = $(SOURCES:day%.cpp=%)

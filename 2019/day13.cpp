@@ -209,9 +209,7 @@ Answer solve_second(Input& input) {
         if (tile == 3) paddle = x;
         else if (tile == 4) ball = x;
 
-        if (paddle < ball) joystick = 1;
-        else if (paddle == ball) joystick = 0;
-        else if (paddle > ball) joystick = -1;
+        joystick = ball - paddle;
 
         //pair<int, int> pos = { x, y };
         if (x == -1 && y == 0) {
