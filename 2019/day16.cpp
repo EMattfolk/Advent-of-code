@@ -25,8 +25,8 @@ Input get_input(const char* filename) {
     return input;
 }
 
-int s[4] = { 0, 1, 0, -1 };
-int series(int p, int i) {
+int8_t s[4] = { 0, 1, 0, -1 };
+int8_t series(int p, int i) {
     return s[(i / p) & 3];
 }
 
@@ -47,12 +47,23 @@ int first_n(vector<uint8_t>& nums, int n) {
 Answer solve_first(Input& input) {
     vector<uint8_t> data = input;
     for (uint8_t i = 0; i < 100; i++) {
-        for (uint32_t j = 0; j < data.size(); j++) {
-            int value = 0;
-            for (uint32_t k = j; k < data.size(); k++) {
-                value += data[k] * series(j+1, k+1);
+        for (uint32_t j = 0; j < data.size() / 2; j++) {
+            int32_t value = 0;
+            int8_t mult = -1;
+            for (uint32_t block = j; block < data.size(); block += j*2 + 2) {
+                mult *= -1;
+                for (uint32_t k = block; k < block + j + 1 && k < data.size(); k++) {
+                    value += data[k] * mult;
+                }
             }
             data[j] = abs(value) % 10;
+        }
+        int32_t cum_sum = 0;
+        for (uint32_t j = data.size() / 2; j < data.size(); j++) cum_sum += data[j];
+        for (uint32_t j = data.size() / 2; j < data.size(); j++) {
+            uint8_t temp = data[j];
+            data[j] = cum_sum % 10;
+            cum_sum -= temp;
         }
     }
     return first_n(data, 8);
@@ -62,11 +73,11 @@ Answer solve_first(Input& input) {
  * Solve the second problem.
  */
 Answer solve_second(Input& input) {
-    uint64_t offset = first_n(input, 7);
-    uint64_t end = input.size() * 10000;
+    uint32_t offset = first_n(input, 7);
+    uint32_t end = input.size() * 10000;
     vector<uint8_t> data;
     data.reserve(end - offset + 1);
-    for (uint64_t i = offset; i < end; i++) {
+    for (uint32_t i = offset; i < end; i++) {
         data.push_back(input[i % input.size()]);
     }
 
