@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+#include <queue>
 #include <cstdint>
 #include <cctype>
 
@@ -13,6 +14,10 @@ using Input = vector<string>;
 using Answer = int;
 
 pair<int, int> start = { 0, 0 };
+int min_dist = 1 << 30;
+string keys = "";
+unordered_map<string, int> states;
+
 
 /*
  * Read input from file.
@@ -95,19 +100,8 @@ vector<string> get_dependencies(
 
 void clean_dependencies(vector<string>& dependencies) {
     for (int i = dependencies.size() - 1; i >= 0; i--) {
-
-        int to_keep = 0;
-        for (int j = dependencies[i].size() - 1; j >= 0; j--) {
-            if (islower(dependencies[i][j])) {
-                to_keep = j + 1;
-                break;
-            }
-        }
-
-        if (to_keep == 0) {
+        if (dependencies[i].size() == 0) {
             dependencies.erase(dependencies.begin() + i);
-        } else {
-            dependencies[i] = dependencies[i].substr(0, to_keep);
         }
     }
 }
@@ -124,64 +118,58 @@ void unlock_key(vector<string>& dependencies, char key) {
     clean_dependencies(dependencies);
 }
 
-vector<char> current_dependencies(vector<string>& dependencies) {
-    unordered_set<char> visible;
-    unordered_set<char> found;
-    vector<char> deps;
+vector<char> visible_keys(vector<string>& dependencies) {
+    vector<char> visible;
     for (string& dependency : dependencies) {
-        for (char dep : dependency) {
-            if (isupper(dep)) break;
-            visible.insert(dep);
-        }
-    }
-    for (string& dependency : dependencies) {
-        for (char dep : dependency) {
-            if (isupper(dep)) {
-                char l = tolower(dep);
-                if (visible.count(l) && found.count(l) == 0) {
-                    deps.push_back(l);
-                    found.insert(l);
-                }
-                break;
-            }
-        }
+        if (isupper(dependency[0])) continue;
+        visible.push_back(dependency[0]);
     }
 
-    return deps;
+    return visible;
 }
 
 // Returns a path to a key with ends inclusive. size()-1 steps.
 vector<pair<int, int>> path_to(
         vector<string>& grid,
-        unordered_set<uint64_t>& visited,
-        pair<int, int> pos,
+        pair<int, int> init_pos,
         char key)
 {
-    visited.insert(pairhash(pos));
+    unordered_set<uint64_t> visited;
+    unordered_map<uint64_t, pair<int, int>> prev;
 
-    // Done?
-    if (grid[pos.second][pos.first] == key) {
-        return { pos };
-    }
+    queue<pair<int, int>> to_visit;
+    to_visit.push(init_pos);
+    visited.insert(pairhash(init_pos));
 
-    pair<int, int> dir = { 1, 0 };
+    while (to_visit.size()) {
+        pair<int, int> pos = to_visit.front();
+        to_visit.pop();
 
-    for (int i = 0; i < 4; i++) {
-
-        // New position
-        pair<int, int> new_pos = { pos.first + dir.first, pos.second + dir.second };
-        dir = rotate_dir(dir);
-
-        // Avoid places we don't want to go to
-        if (visited.count(pairhash(new_pos)) ||
-                grid[new_pos.second][new_pos.first] == '#') continue;
-
-        vector<pair<int, int>> path = path_to(grid, visited, new_pos, key);
-
-        // Return if path is found
-        if (path.size()) {
-            path.push_back(pos);
+        // Done?
+        if (grid[pos.second][pos.first] == key) {
+            vector<pair<int, int>> path = { pos };
+            while (prev.count(pairhash(pos))) {
+                pos = prev[pairhash(pos)];
+                path.push_back(pos);
+            }
             return path;
+        }
+
+        pair<int, int> dir = { 1, 0 };
+
+        for (int i = 0; i < 4; i++) {
+
+            // New position
+            pair<int, int> new_pos = { pos.first + dir.first, pos.second + dir.second };
+            dir = rotate_dir(dir);
+
+            // Avoid places we don't want to go to
+            if (visited.count(pairhash(new_pos)) ||
+                    grid[new_pos.second][new_pos.first] == '#') continue;
+
+            to_visit.push(new_pos);
+            prev[pairhash(new_pos)] = pos;
+            visited.insert(pairhash(new_pos));
         }
     }
 
@@ -189,104 +177,234 @@ vector<pair<int, int>> path_to(
     return vector<pair<int, int>>();
 }
 
-int travel_to(vector<string>& grid, vector<char>& found, pair<int, int>& pos, char key, bool back=false) {
-    unordered_set<uint64_t> visited;
-    auto path = path_to(grid, visited, pos, key);
-    for (int i = path.size() - 1; i >= 0; i--) {
-        pair<int, int>& p = path[i];
-        char& tile = grid[p.second][p.first];
-        if (islower(tile) && tile != '.') { // Uneccessary?
-            found.push_back(tile);
-            tile = '.';
-        }
-    }
-
-    if (back)
-        return (path.size() - 1) * 2;
-    else {
-        pos = path.front();
-        return path.size() - 1;
-    }
-}
-
-unordered_map<uint64_t, char> get_triggers(
-        vector<string>& grid,
+void find_dist(Input& input,
+        char pos,
         vector<string>& dependencies,
-        pair<int, int> pos)
+        vector<vector<int>>& dists,
+        int current_dist=0)
 {
-    unordered_map<uint64_t, char> triggers;
-    unordered_set<char> remaining;
-
-    for (string& dep : dependencies) {
-        bool has_trigger = true;
-        for (char key : dep) {
-            if (isupper(key)) {
-                has_trigger = false;
-                break;
-            }
+    if (dependencies.size() == 0) {
+        if (current_dist < min_dist) {
+            min_dist = current_dist;
         }
-
-        if (has_trigger) {
-            char to_key = dep.back();
-            unordered_set<uint64_t> visited;
-            auto path_to_key = path_to(grid, visited, pos, to_key);
-        }
+        return;
     }
 
-    return triggers;
+    string state = "";
+    for (string& s : dependencies) state += s;
+    state.push_back(pos);
+
+    if (states.count(state)) {
+        if (states[state] <= current_dist) return;
+        else states[state] = current_dist;
+    } else {
+        states[state] = current_dist;
+    }
+
+    auto visible = visible_keys(dependencies);
+    for (char key : visible) {
+        int dist = dists[keys.find(key)][keys.find(pos)];
+        vector<string> current_dep = dependencies;
+        unlock_key(current_dep, key);
+        find_dist(input, key, current_dep, dists, dist + current_dist);
+    }
 }
 
 /*
  * Solve the first problem.
  */
 Answer solve_first(Input& input) {
-    Answer ans = 0;
-
-    vector<char> keyorder;
     unordered_set<uint64_t> visited;
-    vector<string> dependencies = get_dependencies(input, visited, start);
-    pair<int, int> pos = start;
-
-    while (dependencies.size()) {
-
-        vector<char> current_deps = current_dependencies(dependencies);
-
-        if (current_deps.size() == 0) {
-            for (string& s : dependencies) {
-                current_deps.push_back(s.back());
+    unordered_map<char, pair<int, int>> positions;
+    for (int y = 0; y < input.size(); y++) {
+        for (int x = 0; x < input[y].size(); x++) {
+            if (islower(input[y][x])) {
+                keys.push_back(input[y][x]);
             }
-        }
-
-        char closest_key = current_deps[0];
-        int closest_dist = 1 << 30;
-        for (char key : current_deps) {
-            visited.clear();
-            int dist = path_to(input, visited, pos, key).size() - 1;
-            if (dist < closest_dist) {
-                closest_key = key;
-                closest_dist = dist;
-            }
-        }
-
-        ans += travel_to(input, keyorder, pos, closest_key);
-
-        for (char key : keyorder) {
-            unlock_key(dependencies, key);
         }
     }
 
-    //for (char c : keyorder)
-    //    cout << c << endl;
+    for (char key : keys) {
+        auto path = path_to(input, start, key);
+        positions[key] = path[0];
+    }
 
-    return ans;
+    vector<vector<int>> distances;
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        distances.push_back(vector<int>());
+        for (uint32_t j = 0; j < keys.size(); j++) {
+            distances[i].push_back(0);
+        }
+    }
+
+    for (uint32_t i = 0; i < distances.size(); i++) {
+        for (uint32_t j = i; j < distances.size(); j++) {
+            int dist = path_to(input, positions[keys[i]], keys[j]).size() - 1;
+            distances[i][j] = dist;
+            distances[j][i] = dist;
+        }
+    }
+
+    visited.clear();
+    vector<string> dependencies = get_dependencies(input, visited, start);
+    auto visible = visible_keys(dependencies);
+    for (char key : visible) {
+        visited.clear();
+        int dist = path_to(input, start, key).size() - 1;
+        vector<string> current_dep = dependencies;
+        unlock_key(current_dep, key);
+        find_dist(input, key, current_dep, distances, dist);
+    }
+
+    return min_dist;
+}
+
+unordered_map<char, int> key_quadrant;
+unordered_map<char, pair<int, int>> key_pos;
+unordered_map<uint64_t, char> pos_to_key;
+pair<int, int> starts[4];
+
+void find_dist2(Input& input,
+        pair<int, int> pos[4],
+        vector<string> dependencies[4],
+        vector<vector<int>>& dists,
+        int current_dist=0)
+{
+    if (dependencies[0].size() == 0 &&
+            dependencies[1].size() == 0 &&
+            dependencies[2].size() == 0 &&
+            dependencies[3].size() == 0) {
+        if (current_dist < min_dist) {
+            min_dist = current_dist;
+        }
+        return;
+    }
+
+    string state = "";
+    for (int i = 0; i < 4; i++) {
+        for (string& s : dependencies[i]) state += s;
+    }
+    for (int i = 0; i < 4; i++) {
+        if (pos_to_key.count(pairhash(pos[i])))
+            state.push_back(pos_to_key[pairhash(pos[i])]);
+        else
+            state.push_back('@');
+    }
+
+    if (states.count(state)) {
+        if (states[state] <= current_dist) return;
+        else states[state] = current_dist;
+    } else {
+        states[state] = current_dist;
+    }
+
+    vector<char> visible;
+    for (int i = 0; i < 4; i++) {
+        for (char k : visible_keys(dependencies[i])) visible.push_back(k);
+    }
+    for (char key : visible) {
+        int quadrant = key_quadrant[key];
+        int pos_index;
+        pair<int, int> k_pos;
+        if (pos_to_key.count(pairhash(pos[quadrant]))) {
+            pos_index = keys.find(pos_to_key[pairhash(pos[quadrant])]);
+        } else {
+            pos_index = dists.size() - 1;
+        }
+        k_pos = key_pos[key];
+
+        int dist = dists[keys.find(key)][pos_index];
+        vector<string> current_dep0 = dependencies[0];
+        vector<string> current_dep1 = dependencies[1];
+        vector<string> current_dep2 = dependencies[2];
+        vector<string> current_dep3 = dependencies[3];
+        unlock_key(dependencies[0], key);
+        unlock_key(dependencies[1], key);
+        unlock_key(dependencies[2], key);
+        unlock_key(dependencies[3], key);
+        pair<int, int> current_pos = pos[quadrant];
+        pos[quadrant] = k_pos;
+        find_dist2(input, pos, dependencies, dists, dist + current_dist);
+        dependencies[0] = current_dep0;
+        dependencies[1] = current_dep1;
+        dependencies[2] = current_dep2;
+        dependencies[3] = current_dep3;
+        pos[quadrant] = current_pos;
+    }
 }
 
 /*
  * Solve the second problem.
  */
 Answer solve_second(Input& input) {
-    Answer ans = 0;
-    return ans;
+
+    min_dist = 1 << 20;
+    states.clear();
+
+    input[start.second][start.first - 1] = '#';
+    input[start.second][start.first + 1] = '#';
+    input[start.second - 1][start.first] = '#';
+    input[start.second + 1][start.first] = '#';
+
+    starts[0] = { start.first - 1, start.second - 1 };
+    starts[1] = { start.first + 1, start.second - 1 };
+    starts[2] = { start.first - 1, start.second + 1 };
+    starts[3] = { start.first + 1, start.second + 1 };
+
+    input[starts[0].second][starts[0].first] = '@';
+    input[starts[1].second][starts[1].first] = '@';
+    input[starts[2].second][starts[2].first] = '@';
+    input[starts[3].second][starts[3].first] = '@';
+
+    vector<string> deps[4];
+
+    unordered_set<uint64_t> visited;
+    for (int i = 0; i < 4; i++) {
+        visited.clear();
+        deps[i] = get_dependencies(input, visited, starts[i]);
+    }
+
+    for (char key : keys) {
+        vector<pair<int, int>> path;
+        for (int i = 0; i < 4; i++) {
+            path = path_to(input, starts[i], key);
+            if (path.size()) {
+                key_quadrant[key] = i;
+                break;
+            }
+        }
+
+        key_pos[key] = path[0];
+        pos_to_key[pairhash(path[0])] = key;
+    }
+
+    keys += '@';
+    vector<vector<int>> distances;
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        distances.push_back(vector<int>());
+        for (uint32_t j = 0; j < keys.size(); j++) {
+            distances[i].push_back(0);
+        }
+    }
+
+    for (uint32_t i = 0; i < distances.size() - 1; i++) {
+        for (uint32_t j = i; j < distances.size() - 1; j++) {
+            if (key_quadrant[keys[i]] != key_quadrant[keys[j]]) continue;
+            int dist = path_to(input, key_pos[keys[i]], keys[j]).size() - 1;
+            distances[i][j] = dist;
+            distances[j][i] = dist;
+        }
+    }
+
+    for (uint32_t i = 0; i < distances.size() - 1; i++) {
+        int dist = path_to(input, key_pos[keys[i]], '@').size() - 1;
+        distances[i][distances.size() - 1] = dist;
+        distances[distances.size() - 1][i] = dist;
+    }
+
+    find_dist2(input, starts, deps, distances);
+
+    return min_dist;
 }
 
 /*
