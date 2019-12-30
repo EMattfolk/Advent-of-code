@@ -43,20 +43,31 @@ pair<int, int> pairunhash(const uint64_t& pos) {
     return *((pair<int, int>*)addr);
 }
 
-pair<int, int> rotate_dir(const pair<int, int>& dir) {
-    return { -dir.second, dir.first };
+void rotate_dir(pair<int, int>& dir) {
+    int temp = dir.first;
+    dir.first = -dir.second;
+    dir.second = temp;
 }
 
+int name_of(char a, char b) {
+    return (a - 'A') * 26 + (b - 'A');
+}
+
+vector<pair<pair<int, int>, pair<int, int>>> portals(26*26, {{ 0, 0 }, { 0, 0 }});
+
 int traverse(Input& input,
-        unordered_map<string, vector<pair<int, int>>>& portals,
         pair<int, int> start,
         bool recurse=false)
 {
     queue<pair<int, pair<int, int>>> to_visit;
     to_visit.push({ 0, start });
 
-    unordered_set<uint64_t> visited;
-    visited.insert(tdpairhash(to_visit.front()));
+    vector<vector<vector<bool>>> visited;
+    visited.push_back(vector<vector<bool>>());
+    for (uint32_t i = 0; i < input.size(); i++) {
+        visited[0].push_back(vector<bool>(input[i].size(), false));
+    }
+    visited[0][to_visit.front().second.second][to_visit.front().second.first] = true;
 
     int steps = 0;
     int next_step = 1;
@@ -71,40 +82,39 @@ int traverse(Input& input,
         for (int i = 0; i < 4; i++) {
             pair<int, pair<int, int>> new_pos = { pos.first,
                 { pos.second.first + dir.first, pos.second.second + dir.second }};
+            int& depth = new_pos.first;
             int x = new_pos.second.first;
             int y = new_pos.second.second;
 
-            if (visited.count(tdpairhash(new_pos)) || input[y][x] == '#') {
-                dir = rotate_dir(dir);
+            if (input[y][x] == '#' || visited[depth][y][x]) {
+                rotate_dir(dir);
                 continue;
             }
 
             if (input[y][x] == '.') {
-                visited.insert(tdpairhash(new_pos));
+                visited[depth][y][x] = true;
                 to_visit.push(new_pos);
-                dir = rotate_dir(dir);
+                rotate_dir(dir);
                 continue;
             }
 
-            string name;
-            name.push_back(input[y][x]);
-            name.push_back(input[y + dir.second][x + dir.first]);
-            if (name == "ZZ" && new_pos.first == 0) return steps;
+            int name = name_of(input[y][x], input[y + dir.second][x + dir.first]);
+            if (name == name_of('Z', 'Z') && new_pos.first == 0) return steps;
 
-            if (name == "AA" || name == "ZZ") {
-                dir = rotate_dir(dir);
+            if (name == name_of('A', 'A') || name == name_of('Z', 'Z')) {
+                rotate_dir(dir);
                 continue;
             }
 
 
             if (i >= 2) {
-                swap(name[0], name[1]);
+                name = name / 26 + 26 * (name % 26);
             }
 
-            if (pairhash(portals[name][0]) == pairhash(pos.second)) {
-                new_pos.second = portals[name][1];
+            if (pairhash(portals[name].first) == pairhash(pos.second)) {
+                new_pos.second = portals[name].second;
             } else {
-                new_pos.second = portals[name][0];
+                new_pos.second = portals[name].first;
             }
 
             if (recurse) {
@@ -113,22 +123,29 @@ int traverse(Input& input,
                     || y == 1
                     || y == input.size() - 2) {
                     if (new_pos.first == 0) {
-                        dir = rotate_dir(dir);
+                        rotate_dir(dir);
                         continue;
                     } else {
-                        new_pos.first--;
+                        depth--;
                     }
                 } else {
-                    new_pos.first++;
+                    depth++;
                 }
             }
 
-            if (!visited.count(tdpairhash(new_pos))) {
-                visited.insert(tdpairhash(new_pos));
+            if (depth == visited.size()) {
+                visited.push_back(vector<vector<bool>>());
+                for (uint32_t i = 0; i < input.size(); i++) {
+                    visited[depth].push_back(vector<bool>(input[i].size(), false));
+                }
+            }
+
+            if (!visited[depth][new_pos.second.second][new_pos.second.first]) {
+                visited[depth][new_pos.second.second][new_pos.second.first] = true;
                 to_visit.push(new_pos);
             }
 
-            dir = rotate_dir(dir);
+            rotate_dir(dir);
         }
 
         if (--next_step == 0) {
@@ -140,8 +157,6 @@ int traverse(Input& input,
     return -1;
 }
 
-unordered_map<string, vector<pair<int, int>>> portals;
-
 /*
  * Solve the first problem.
  */
@@ -150,13 +165,13 @@ Answer solve_first(Input& input) {
     for (uint32_t y = 0; y < input.size(); y++) {
         for (uint32_t x = 0; x < input[y].size() - 1; x++) {
             if (isupper(input[y][x]) && isupper(input[y][x+1])) {
-                string name = "";
-                name.push_back(input[y][x]);
-                name.push_back(input[y][x+1]);
+                int name = name_of(input[y][x], input[y][x+1]);
+                pair<int, int>& opening =
+                    (portals[name].first.first == 0 && portals[name].first.second == 0 ? portals[name].first : portals[name].second);
                 if (x != 0 && input[y][x-1] == '.') {
-                    portals[name].push_back({ x-1, y });
+                    opening = { x-1, y };
                 } else {
-                    portals[name].push_back({ x+2, y });
+                    opening = { x+2, y };
                 }
             }
         }
@@ -164,23 +179,23 @@ Answer solve_first(Input& input) {
     for (uint32_t x = 0; x < input[0].size(); x++) {
         for (uint32_t y = 0; y < input.size() - 1; y++) {
             if (isupper(input[y][x]) && isupper(input[y+1][x])) {
-                string name = "";
-                name.push_back(input[y][x]);
-                name.push_back(input[y+1][x]);
+                int name = name_of(input[y][x], input[y+1][x]);
+                pair<int, int>& opening =
+                    (portals[name].first.first == 0 && portals[name].first.second == 0 ? portals[name].first : portals[name].second);
                 if (y != 0 && input[y-1][x] == '.') {
-                    portals[name].push_back({ x, y-1 });
+                    opening = { x, y-1 };
                 } else {
-                    portals[name].push_back({ x, y+2 });
+                    opening = { x, y+2 };
                 }
             }
         }
     }
 
-    pair<int, int> start = portals["AA"][0];
-    portals["AA"].push_back(portals["ZZ"][0]);
-    portals["ZZ"].push_back(portals["AA"][0]);
+    pair<int, int> start = portals[name_of('A', 'A')].first;
+    portals[name_of('A', 'A')].second = portals[name_of('Z', 'Z')].first;
+    portals[name_of('Z', 'Z')].second = portals[name_of('A', 'A')].first;
 
-    ans = traverse(input, portals, start);
+    ans = traverse(input, start);
 
     return ans;
 }
@@ -189,7 +204,7 @@ Answer solve_first(Input& input) {
  * Solve the second problem.
  */
 Answer solve_second(Input& input) {
-    Answer ans = traverse(input, portals, portals["AA"][0], true);
+    Answer ans = traverse(input, portals[name_of('A', 'A')].first, true);
     return ans;
 }
 
