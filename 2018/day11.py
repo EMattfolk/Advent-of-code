@@ -2,7 +2,8 @@ from time import process_time as clock
 sta = clock()
 
 # Initialize the data
-serial = 3613
+with open("11.txt") as f:
+    serial = int(f.read())
 
 def get_cell (x,y):
     rackid = x + 10
