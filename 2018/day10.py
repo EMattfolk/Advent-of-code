@@ -34,7 +34,7 @@ def both ():
 
     positions = set(positions)
     res = "\n"
-    for y in range(min_y, max_y):
+    for y in range(min_y, max_y + 1):
         for x in range(min_x, max_x + 1):
             if (x, y) in positions:
                 res += "#"
@@ -42,7 +42,7 @@ def both ():
                 res += "."
         res += "\n"
 
-    print("First:", res, "Time:", clock() - st)
+    print("First:", "Time:", clock() - st, res)
     print("Second:", sec, "Time:", clock() - st)
 
 # Solve the problems
