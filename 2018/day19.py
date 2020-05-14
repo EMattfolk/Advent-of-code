@@ -1,5 +1,8 @@
 from time import process_time as clock
 
+# This may change with input
+RESULT_REG = 3
+
 def addr (reg, a, b, c):
     reg[c] = reg[a] + reg[b]
 
@@ -58,6 +61,10 @@ with open("19.txt") as f:
     instr_list = [(instruction_names.index(l.split()[0]),) + tuple(int(n) for n in l.split()[1:]) for l in data[1:]]
 
 def factor (n):
+
+    if n == 0:
+        return []
+
     l = []
     c = 0
     while not n % 2:
@@ -90,7 +97,8 @@ def solve (reg):
         instr = instr_list[reg[instr_reg]]
         instructions[instr[0]](reg, instr[1], instr[2], instr[3])
         reg[instr_reg] += 1
-    return div_sum(factor(reg[4]))
+
+    return div_sum(factor(reg[RESULT_REG]))
 
 # Function for solving the first problem
 def first ():
