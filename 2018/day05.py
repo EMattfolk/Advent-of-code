@@ -3,26 +3,34 @@ from time import process_time as clock
 # Initialize the data
 with open("05.txt") as f:
     data = list(f.read().strip())
-backup = []
-x = [i for i in range(len(data))]
+
+backup = data.copy()
+
 # Function for solving the first problem
-def first ():
+def first (silent=False, data=data):
     st = clock()
     i = 0
     res = len(data)
-    while i < len(data) - 1:
-        if data[x[i]].upper() == data[x[i+1]].upper() and data[x[i+1]] != data[x[i]]:
-            x[i] = x[x[i]-1]
-            x[i+1] = x[x[i+1]+1]
-            res -= 2
-        else:
-            temp = i
-            i = x[i+1]
-            x[i-1] = x[temp]
+    old_res = 0
+    while old_res != res:
+        old_res = res
 
-    global backup
-    backup = data.copy()
-    print("First:", res, "Time:", clock() - st)
+        for i in range(len(data) - 2, -1, -1):
+            j = i + 1
+
+            if j >= len(data):
+                continue
+
+            if data[i].lower() == data[j].lower() and data[i] != data[j]:
+                del data[i]
+                del data[i]
+
+        res = len(data)
+
+    if not silent:
+        print("First:", res, "Time:", clock() - st)
+    else:
+        return res
 
 # Function for solving the second problem
 def second ():
@@ -30,15 +38,7 @@ def second ():
     res = len(backup)
     for letter in "abcdefghijklmnopqrstuvwxyz":
         data = [i for i in backup.copy() if i.lower() != letter]
-        i = 0
-        while i < len(data) - 1:
-            if data[i].upper() == data[i+1].upper() and data[i+1] != data[i]:
-                del data[i]
-                del data[i]
-                i -= 1
-            else:
-                i += 1
-        res = min(len(data), res)
+        res = min(res, first(silent=True, data=data))
 
     print("Second:", res, "Time:", clock() - st)
 
