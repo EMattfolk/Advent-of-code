@@ -67,6 +67,8 @@ def first ():
     starts = [ ((500, 0), 1) ]
     invalid = set()
 
+    old_res = 0
+
     while True:
 
         settled = False
@@ -90,7 +92,7 @@ def first ():
 
             if prev_touch == False:
                 prev_touch = True
-                if not pot_new: 
+                if not pot_new:
                     pot_new = [(pos, v), (pos, -v)]
                     #print_section(*pos)
                     #input()
@@ -121,6 +123,12 @@ def first ():
                     starts.append(n)
 
         if not starts:
+
+            res = len([i for i in visited if i[1] >= miny])
+            if res == old_res:
+                break
+            old_res = res
+
             # Get what was missing for some reason
             grid = output()
             for j in range(1, maxy):
@@ -134,9 +142,8 @@ def first ():
             if not starts:
                 break
 
-    res = len([i for i in visited if i[1] >= miny])
     print("First:", res, "Time:", clock() - st)
-    output()
+    #output()
 
 # Function for solving the second problem
 def second ():
@@ -148,4 +155,4 @@ def second ():
 if __name__ == "__main__":
     first()
     second()
-    write_out()
+    #write_out()
