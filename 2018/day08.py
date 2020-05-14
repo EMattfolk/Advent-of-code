@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day08.in") as f:
+with open("08.txt") as f:
     data = [int(i) for i in f.read().strip().split()]
 
 def traverse1 (l):
@@ -49,5 +49,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

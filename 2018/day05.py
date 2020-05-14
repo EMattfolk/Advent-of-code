@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day05.in") as f:
+with open("05.txt") as f:
     data = list(f.read().strip())
 backup = []
 x = [i for i in range(len(data))]
@@ -43,5 +43,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day25.in") as f:
+with open("25.txt") as f:
     points = [tuple(int(i) for i in l.split(",")) for l in f]
 
 def dist (coord1, coord2):
@@ -52,4 +52,5 @@ def first ():
     print("First:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
+if __name__ == "__main__":
+    first()

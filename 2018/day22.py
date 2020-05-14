@@ -2,7 +2,7 @@ from time import process_time as clock
 from collections import deque
 
 # Initialize the data
-with open("day22.in") as f:
+with open("22.txt") as f:
     data = [l.split()[1] for l in f]
     depth = int(data[0])
     target = data[1].split(",")
@@ -122,5 +122,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

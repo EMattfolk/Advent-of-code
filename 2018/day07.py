@@ -3,7 +3,7 @@ from copy import deepcopy
 times = {l:60+1+i for i,l in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ")}
 
 # Initialize the data
-with open("day07.in") as f:
+with open("07.txt") as f:
     dependencies = {i:[] for i in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"}
     for i in f:
         i = i.split()
@@ -79,5 +79,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

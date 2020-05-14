@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day18.in") as f:
+with open("18.txt") as f:
     grid = [list(l.strip()) for l in f]
 
 size = 50

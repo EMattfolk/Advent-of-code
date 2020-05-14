@@ -3,7 +3,7 @@ from copy import deepcopy as cp
 from collections import deque
 
 # Initialize the data
-with open("day15.in") as f:
+with open("15.txt") as f:
     grid = [list(l.strip()) for l in f]
     backup = grid
 
@@ -194,5 +194,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

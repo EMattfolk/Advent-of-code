@@ -52,7 +52,7 @@ instruction_names = ["addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bo
 instructions = [addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr]
 
 # Initialize the data
-with open("day21.in") as f:
+with open("21.txt") as f:
     data = [l.strip() for l in f]
     instr_reg = int(data[0][-1])
     instr_list = [(instruction_names.index(l.split()[0]),) + tuple(int(n) for n in l.split()[1:]) for l in data[1:]]
@@ -114,5 +114,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

@@ -7,7 +7,7 @@ def repeat (l):
             yield i
 
 # Initialize the data
-with open("day01.in") as f:
+with open("01.txt") as f:
     data = [int(i) for i in f.read().strip().split("\n")]
 
 # Function for solving the first problem
@@ -28,5 +28,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

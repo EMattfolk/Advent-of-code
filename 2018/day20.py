@@ -2,7 +2,7 @@ from time import process_time as clock
 from collections import deque
 
 # Initialize the data
-with open("day20.in") as f:
+with open("20.txt") as f:
     regex = f.read().strip()[1:-1]
 
 grid = [["#"] * 300 for i in range(300)]
@@ -75,5 +75,6 @@ def solve ():
     print("First:", res1, "Second:", res2, "Time:", clock() - st)
 
 # Solve the problems
-solve()
-output()
+if __name__ == "__main__":
+    solve()
+    output()

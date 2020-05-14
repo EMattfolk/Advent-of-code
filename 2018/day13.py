@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day13.in") as f:
+with open("13.txt") as f:
     grid = [list(l) for l in f]
 
 positions = []
@@ -95,4 +95,5 @@ def both ():
     print(res, "Time:", clock() - st)
 
 # Solve the problems
-both()
+if __name__ == "__main__":
+    both()

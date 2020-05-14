@@ -12,7 +12,7 @@ class Army:
         self.initiative = 0
 
 # Initialize the data
-with open("day24.in") as f:
+with open("24.txt") as f:
     immune = []
     infect = []
     for l in f:
@@ -210,5 +210,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day02.in") as f:
+with open("02.txt") as f:
     data = [l.strip() for l in f]
 
 # Function for solving the first problem
@@ -54,5 +54,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

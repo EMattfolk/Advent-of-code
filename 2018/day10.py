@@ -3,7 +3,7 @@ from time import process_time as clock
 # Initialize data
 positions = []
 velocities = []
-with open("day10.in") as f:
+with open("10.txt") as f:
     for line in f:
         line = line.split(", ")
         pos = (int(line[0][-6:]), int(line[1][:6]))
@@ -46,4 +46,5 @@ def both ():
     print("Second:", sec, "Time:", clock() - st)
 
 # Solve the problems
-both()
+if __name__ == "__main__":
+    both()

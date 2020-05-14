@@ -1,7 +1,7 @@
 from time import process_time as clock
 
 # Initialize the data
-with open("day12.in") as f:
+with open("12.txt") as f:
     data = [i.split() for i in f]
 cells = list(data[0][2])
 center = { i:j for i,j in zip([a[0] for a in data[1:]], [a[2] for a in data[1:]]) }
@@ -52,5 +52,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()

@@ -14,7 +14,7 @@ def distsum(x,y,l):
     return sum([dist(x,y,*i) for i in l])
 
 # Initialize the data
-with open("day06.in") as f:
+with open("06.txt") as f:
     data = [(int(i), int(j)) for i,j in [l.split(", ") for l in f]] 
 minx, miny = 1000, 1000
 maxx, maxy = 0, 0
@@ -73,5 +73,6 @@ def second ():
     print("Second:", res, "Time:", clock() - st)
 
 # Solve the problems
-first()
-second()
+if __name__ == "__main__":
+    first()
+    second()
