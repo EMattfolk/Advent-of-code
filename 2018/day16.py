@@ -6,7 +6,7 @@ with open("16.txt") as f:
     data_first = []
     data_second = []
     i = 0
-    while i < len(f):
+    while True:
         if f[i][0] == "B":
             temp = [] # Change to tuples?
             temp.append([int(f[i][n]) for n in [9, 12, 15, 18]])
@@ -17,8 +17,12 @@ with open("16.txt") as f:
             i += 2
             data_first.append(temp)
         else:
-            data_second.append([int(n) for n in f[i].split()])
-            i += 1
+            i += 2
+            break
+
+    while i < len(f):
+        data_second.append([int(n) for n in f[i].split()])
+        i += 1
 
             
 def addr (reg, a, b, c):
