@@ -67,9 +67,6 @@ def both ():
                 if not has_crashed:
                     first = pos
                     has_crashed = True
-                if len(positions) == 3:
-                    last = [i for i in positions if i not in to_remove][0]
-                    running = False
             if grid[pos[1]][pos[0]] == '/':
                 if vel[0]:
                     vel = turn_left(vel)
@@ -84,11 +81,14 @@ def both ():
 
             elif grid[pos[1]][pos[0]] == '+':
                 vel = turn(vel)
-            
+
             velocities[pos] = vel
         for r in to_remove:
             positions.remove(r)
             positions.remove(r)
+            if len(positions) == 1:
+                last = positions[0]
+                running = False
 
     res = "First: {} Last: {}".format(first, last)
 
