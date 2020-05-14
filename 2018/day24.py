@@ -16,6 +16,8 @@ with open("24.txt") as f:
     immune = []
     infect = []
     for l in f:
+        if l == "\n":
+            continue
         if l[:6] == "Immune":
             is_infection = False
             continue
