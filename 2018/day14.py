@@ -1,6 +1,7 @@
 from time import process_time as clock
 
-rec = 320851
+with open("14.txt") as f:
+    rec = int(f.read())
 
 st = clock()
 scores = [3, 7, 1, 0, 1, 0]
@@ -20,5 +21,10 @@ while not res2:
     curr2 = (curr2 + scores[curr2] + 1) % len(scores)
 
 res1 = "".join([str(i) for i in scores[rec:rec+10]])
-print("First:", res1, "Time:", clock() - st)
-print("Second:", res2, "Time:", clock() - st)
+
+def both():
+    print("First:", res1, "Time:", clock() - st)
+    print("Second:", res2, "Time:", clock() - st)
+
+if __name__ == "__main__":
+    both()
