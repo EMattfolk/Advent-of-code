@@ -34,8 +34,18 @@ def first ():
 def second ():
     st = clock()
     max_connections = (0, (0,0,0))
-    for n in nano:#(n[0] + n[3], n[1], n[2]), (n[0], n[1] + n[3], n[2]), (n[0], n[1], n[2] + n[3]), (n[0] - n[3], n[1], n[2]), (n[0], n[1] - n[3], n[2]), (n[0], n[1], n[2] - n[3])
-        for p in [(n[0] + n[3]//2, n[1] + n[3]//2, n[2]), (n[0] + n[3]//2, n[1], n[2] + n[3]//2), (n[0], n[1] + n[3]//2, n[2] + n[3]//2), ]:
+    for x, y, z, r in nano:
+        candidates = [
+            # Nodes / pointy bits
+            (x + r, y, z),
+            (x, y + r, z),
+            (x, y, z + r),
+            (x - r, y, z),
+            (x, y - r, z),
+            (x, y, z - r),
+        ]
+
+        for p in candidates:
             c = 0
             for n1 in nano:
                 if dist(*p, *n1[:3]) <= n1[3]:
@@ -45,6 +55,34 @@ def second ():
             if c == max_connections[0]:
                 if sum([abs(i) for i in p]) < sum([abs(i) for i in max_connections[1]]):
                     max_connections = (c, p)
+
+    # Binary search for the point closest to (0, 0, 0) using one
+    # point in the area with most nanobots within range.
+    changed = True
+    step = 80000000
+    while changed:
+        changed = False
+        for xo in range(-1, 2):
+            for yo in range(-1, 2):
+                for zo in range(-1, 2):
+                    p = max_connections[1]
+                    p = tuple(pi + step * o for pi, o in zip(p, (xo, yo, zo)))
+
+                    c = 0
+                    for n1 in nano:
+                        if dist(*p, *n1[:3]) <= n1[3]:
+                            c += 1
+                    if c > max_connections[0]:
+                        max_connections = (c, p)
+                        changed = True
+                    if c == max_connections[0]:
+                        if sum([abs(i) for i in p]) < sum([abs(i) for i in max_connections[1]]):
+                            max_connections = (c, p)
+                            changed = True
+
+        if not changed and step > 1:
+            step //= 2
+            changed = True
 
     res = sum([abs(i) for i in max_connections[1]])
 
