@@ -1,5 +1,6 @@
 from time import process_time as clock
 from collections import deque
+from heapq import heappop as pop, heappush as push
 
 # Initialize the data
 with open("22.txt") as f:
@@ -43,7 +44,7 @@ def second ():
     tx += 1
     ty += 1
 
-    padding = 40
+    padding = 60
     grid = [[0] * (tx + padding) for _ in range(ty + padding)]
 
     times = {}
@@ -61,7 +62,7 @@ def second ():
                 geo = grid[y][x-1] * grid[y-1][x]
 
             grid[y][x] = (geo + depth) % 20183
-            times[(x,y)] = (100000000, set())
+            times[(x, y)] = [100000000] * 3
 
     for y in range(ty + padding):
         for x in range(tx + padding):
@@ -75,38 +76,38 @@ def second ():
     # Climber gear = 1  not narrow
     # Niether      = 2  not rocky
 
-    times[(0, 0)] = (0, set())
-    times[target] = (sum(target) * 8, set())
-    # (x, y, gear, time)
-    open_nodes = deque([(0, 0, 0, 0)])
+    heuristic = lambda p: abs(p[0] - target[0]) + abs(p[1] - target[1])
+
+    open_nodes = []
+
+    # (heuristic, time, x, y, gear)
+    push(open_nodes, (heuristic((0, 0)), 0, 0, 0, 0))
+
+    res = (10000000, (0, 0))
 
     while open_nodes:
 
-        x, y, gear, time = open_nodes.pop()
+        heu, time, x, y, gear = pop(open_nodes)
 
-        if time > times[target][0]: continue
+        if heu >= times[(x, y)][gear]:
+            continue
+
+        times[(x, y)][gear] = heu
 
         if (x, y) == target:
             if gear != 0:
                 time += 7
-            if times[target][0] > time:
-                times[target] = (time, {(gear, time)})
+            if (time, (x, y)) < res:
+                res = (time, (x, y))
             continue
 
-        if time > times[(x, y)][0] + 10: continue
-        if time <= times[(x, y)][0] + 10 and time >= times[(x, y)][0]:
-            if (gear, time) not in times[(x, y)][1]:
-                times[(x, y)][1].add((gear, time))
-            else:
-                continue
-        else: times[(x, y)] = (time, {(gear, time)})
-
         for nx, ny in [(x + 1, y), (x, y + 1), (x - 1, y), (x, y - 1)]:
-            if nx < 0 or nx >= tx + padding or ny < 0 or ny >= ty + padding: continue
+            if (nx, ny) not in times:
+                continue
 
             terrain = grid[ny][nx]
             if (terrain + 2) % 3 != gear:
-                open_nodes.appendleft((nx, ny, gear, time + 1))
+                push(open_nodes, (time + 1 + heuristic((nx, ny)), time + 1, nx, ny, gear))
 
             old_terrain = grid[y][x]
             if old_terrain != terrain:
@@ -114,10 +115,9 @@ def second ():
                 if (old_terrain + 2) % 3 == new_gear:
                     new_gear = (gear + 2) % 3
 
-                open_nodes.appendleft((nx, ny, new_gear, time + 8))
+                push(open_nodes, (time + 8 + heuristic((nx, ny)), time + 8, nx, ny, new_gear))
 
-
-    res = times[target][0]
+    res = res[0]
 
     print("Second:", res, "Time:", clock() - st)
 
