@@ -1,5 +1,26 @@
 from time import process_time as clock
 
+"""
+0  1  2  3  4  5
+a  b  c  d  e  f
+
+add 16 to c
+set e to 834
+add 1 to f
+mul f by 22
+add 17 to f
+add f to e
+add a to c
+set c to 0
+set b to 1
+set d to 1
+set f to b * d <------
+if f != e:           |
+add 1 to d           |
+if d <= w:           |
+goto ----------------|
+"""
+
 # This may change with input
 RESULT_REG = 3
 

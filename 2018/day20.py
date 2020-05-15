@@ -26,8 +26,8 @@ def traverse (pos, path, i=0):
             grid[pos[1]][pos[0]] = "."
         i += 1
 
-def djik (y, x):
 
+def bfs (y, x):
     # Open nodes
     op = deque([(y, x, 0)])
     # Vistited nodes in set for fast checks
@@ -77,4 +77,4 @@ def solve ():
 # Solve the problems
 if __name__ == "__main__":
     solve()
-    output()
+    #output()
