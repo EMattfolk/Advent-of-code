@@ -2,7 +2,18 @@ from time import process_time as clock
 
 # Initialize the data
 with open("25.txt") as f:
-    points = [tuple(int(i) for i in l.split(",")) for l in f]
+    points = { tuple(int(i) for i in l.split(",")): False for l in f }
+
+adjacent_offsets = []
+for x in range(-3, 4):
+    ax = abs(x)
+    for y in range(-3+ax, 4-ax):
+        ay = ax + abs(y)
+        for z in range(-3+ay, 4-ay):
+            az = ay + abs(z)
+            for w in range(-3+az, 4-az):
+                adjacent_offsets.append((x, y, z, w))
+
 
 def dist (coord1, coord2):
     return sum([abs(i-j) for i, j in zip(coord1, coord2)])
@@ -15,39 +26,27 @@ def is_connected (const1, const2):
     return False
 
 
+def discover(points, point):
+    if points[point]:
+        return
+
+    points[point] = True
+
+    for offsets in adjacent_offsets:
+        p = tuple(pi + o for pi, o in zip(point, offsets))
+        if p in points:
+            discover(points, p)
+
+
 # Function for solving the first problem
 def first ():
     st = clock()
-    constellations = []
-    for p in points:
-        found = False
-        for const in constellations:
-            for coord in const:
-                if dist(coord, p) <= 3:
-                    const.append(p)
-                    found = True
-                    break
-            if found:
-                break
-        if not found:
-            constellations.append([p])
 
-    found = True
-    while found:
-        found = False
-        for i, const1 in enumerate(constellations):
-            connections = []
-            for j, const2 in enumerate(constellations[i+1:]):
-                if is_connected(const1, const2):
-                    connections.append(i+j+1)
-                    found = True
-            if found:
-                for r in reversed(connections):
-                    const1 += constellations[r]
-                    del constellations[r]
-                break
-
-    res = len(constellations)
+    res = 0
+    for point in points:
+        if not points[point]:
+            discover(points, point)
+            res += 1
 
     print("First:", res, "Time:", clock() - st)
 
