@@ -1,3 +1,6 @@
+from time import process_time
+
+st = process_time()
 for i in range(1, 26):
     print("Day {:>2}".format(i))
     try:
@@ -11,3 +14,5 @@ for i in range(1, 26):
         print(flush=True)
     except Exception as e:
         print("Failed to run day {}!".format(i))
+
+print("Ran all solutions in:", process_time() - st)

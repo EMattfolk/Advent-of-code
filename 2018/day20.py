@@ -65,16 +65,16 @@ def output ():
         f.write(data)
 
 # Function for solving both problems
-def solve ():
+def both ():
     st = clock()
     res = 0
     pos = (150, 150)
     traverse(pos, regex)
     grid[pos[1]][pos[0]] = "X"
-    res1, res2 = djik(*pos)
+    res1, res2 = bfs(*pos)
     print("First:", res1, "Second:", res2, "Time:", clock() - st)
 
 # Solve the problems
 if __name__ == "__main__":
-    solve()
+    both()
     #output()

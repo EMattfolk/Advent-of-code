@@ -51,6 +51,10 @@ def first ():
 
     print("First:", res, "Time:", clock() - st)
 
+# Dummy
+def second():
+    pass
+
 # Solve the problems
 if __name__ == "__main__":
     first()
