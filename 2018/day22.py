@@ -43,7 +43,7 @@ def second ():
     tx += 1
     ty += 1
 
-    padding = 20 
+    padding = 40
     grid = [[0] * (tx + padding) for _ in range(ty + padding)]
 
     times = {}
@@ -62,7 +62,7 @@ def second ():
 
             grid[y][x] = (geo + depth) % 20183
             times[(x,y)] = (100000000, set())
-    
+
     for y in range(ty + padding):
         for x in range(tx + padding):
             grid[y][x] %= 3
@@ -79,7 +79,7 @@ def second ():
     times[target] = (sum(target) * 8, set())
     # (x, y, gear, time)
     open_nodes = deque([(0, 0, 0, 0)])
-    
+
     while open_nodes:
 
         x, y, gear, time = open_nodes.pop()
@@ -93,8 +93,8 @@ def second ():
                 times[target] = (time, {(gear, time)})
             continue
 
-        if time > times[(x, y)][0] + 6: continue
-        if time <= times[(x, y)][0] + 6 and time >= times[(x, y)][0]:
+        if time > times[(x, y)][0] + 10: continue
+        if time <= times[(x, y)][0] + 10 and time >= times[(x, y)][0]:
             if (gear, time) not in times[(x, y)][1]:
                 times[(x, y)][1].add((gear, time))
             else:

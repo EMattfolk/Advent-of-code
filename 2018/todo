@@ -1,6 +1,7 @@
 Optimization:
     day 5: Create some sort of linked list that is better than a standard list
     day 14: very slow
+    day 22: ~3 minutes. Can be shortened drastically with a good djikstras
 
 Ug:
     day 13: Why did i write this code?
