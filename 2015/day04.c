@@ -142,7 +142,8 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
 }
 
 char* solve_day_04(char* input) {
-	input[strlen(input) - 2] = '\0';
+
+	input[strlen(input) - 1] = '\0';
 
 	char buf[64];
 

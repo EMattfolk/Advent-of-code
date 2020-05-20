@@ -59,7 +59,9 @@ int main() {
 
 	printf("\n");
 
-	char buf[100000];
+	const int BUF_SIZE = 100000;
+
+	char buf[BUF_SIZE];
 	for (int i = 0; i < 25; i++) {
 		int day = i + 1;
 
@@ -76,6 +78,8 @@ int main() {
 
 			read_bytes += cur;
 		}
+
+		memset(buf + read_bytes, 0, BUF_SIZE - read_bytes);
 
 		clock_t st = clock();
 		char *result = (solve_functions[i])(buf);
