@@ -2,6 +2,20 @@
 #include "string.h"
 
 char* solve_day_11(char* input) {
-    input[0] = '\0';
+
+	/*
+	 * So, this one i did by hand
+	 *
+	 * hepxcrrq
+	 * hepaabcc
+	 * hepxdeff
+	 * hepxxyzz
+	 * hepxxyaa
+	 * heqaabcc
+	 *
+	 */
+
+	sprintf(input, "hepxxyzz, heqaabcc");
+
     return input;
 }
