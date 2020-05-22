@@ -1,45 +1,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "hashmap.h"
-
-#define LOCAL_STRING_SIZE 20
-
-typedef struct local_string {
-	char chars[LOCAL_STRING_SIZE];
-} string;
-
-string to_string(char *s) {
-	string str;
-	memset(str.chars, 0, LOCAL_STRING_SIZE * sizeof(char));
-
-	bool success = false;
-	for (int i = 0; i < LOCAL_STRING_SIZE; i++) {
-		str.chars[i] = s[i];
-		if (s[i] == '\0') {
-			success = true;
-			break;
-		}
-	}
-
-	if (!success) {
-		printf("String construction failed for string '%s': not enough buffer space\n", s);
-		fflush(stdout);
-	}
-
-	return str;
-}
-
-uint64_t djb2(string *str) {
-	uint64_t hash = 5381;
-	int c;
-
-	char *it = (char*)str;
-	while ((c = *it++)) {
-		hash = ((hash << 5) + hash) + c;
-	}
-
-	return hash;
-}
+#include "utils.h"
 
 char* solve_day_09(char* input) {
 
@@ -91,7 +53,7 @@ char* solve_day_09(char* input) {
 	int longest = 0;
 	string permutation;
 	for (int i = 0; i < city_number; i++) {
-		sprintf((char*)&permutation + i, "%d", i);
+		sprintf(permutation.chars + i, "%d", i);
 	}
 
 	void swap(char* a, char* b) {
@@ -120,7 +82,7 @@ char* solve_day_09(char* input) {
 		}
 	}
 
-	run_permutations((char*)&permutation, 0, city_number);
+	run_permutations(permutation.chars, 0, city_number);
 
 	sprintf(input, "%d, %d", shortest, longest);
 	

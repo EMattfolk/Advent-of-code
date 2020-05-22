@@ -87,6 +87,7 @@ int main() {
 
 		if (result[0] != '\0') {
 			printf("Day %2d: %8.3fms - %s\n", day, duration, result);
+			fflush(stdout);
 		}
 	}
 
