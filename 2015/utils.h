@@ -1,5 +1,8 @@
 #pragma once
 
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+
 #define LOCAL_STRING_SIZE 20
 
 typedef struct local_string {
