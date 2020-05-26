@@ -14,7 +14,7 @@ char* solve_day_10(char* input) {
 	char *from_it = from;
 	char *to_it = to;
 
-	int ans1;
+	int ans1 = 0;
 
 	for (int i = 0; i < 50; i++) {
 

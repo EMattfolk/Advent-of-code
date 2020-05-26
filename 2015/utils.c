@@ -1,6 +1,6 @@
 #include "utils.h"
 
-string to_string(char *s) {
+string to_string(const char *s) {
 	string str;
 	memset(str.chars, 0, LOCAL_STRING_SIZE * sizeof(char));
 
@@ -21,7 +21,7 @@ string to_string(char *s) {
 	return str;
 }
 
-uint64_t djb2(string *str) {
+uint64_t djb2(const string *str) {
 	uint64_t hash = 5381;
 	int c;
 
