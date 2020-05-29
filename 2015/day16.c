@@ -25,7 +25,7 @@ char* solve_day_16(char* input) {
         string key = to_string(keys[i]);
         int value = values[i];
 
-        hashmap_put(&data, &key, &value, djb2(&key));
+        hashmap_put(&data, &key, &value, djb2(key.chars));
     }
 
     inline char* next() {
@@ -33,21 +33,21 @@ char* solve_day_16(char* input) {
     }
 
     bool cmp1(string *key, int value) {
-        return !hashmap_contains(&data, key, djb2(key)) ||
-            *(int*)hashmap_get(&data, key, djb2(key)) == value;
+        return !hashmap_contains(&data, key, djb2(key->chars)) ||
+            *(int*)hashmap_get(&data, key, djb2(key->chars)) == value;
     }
 
     bool cmp2(string *key, int value) {
         if (key->chars[2] == 't' || key->chars[0] == 't') {
-            return !hashmap_contains(&data, key, djb2(key)) ||
-                *(int*)hashmap_get(&data, key, djb2(key)) < value;
+            return !hashmap_contains(&data, key, djb2(key->chars)) ||
+                *(int*)hashmap_get(&data, key, djb2(key->chars)) < value;
         } else if ((key->chars[0] == 'p' && key->chars[1] == 'o') || key->chars[3] == 'd') {
-            return !hashmap_contains(&data, key, djb2(key)) ||
-                *(int*)hashmap_get(&data, key, djb2(key)) > value;
+            return !hashmap_contains(&data, key, djb2(key->chars)) ||
+                *(int*)hashmap_get(&data, key, djb2(key->chars)) > value;
         }
 
-        return !hashmap_contains(&data, key, djb2(key)) ||
-            *(int*)hashmap_get(&data, key, djb2(key)) == value;
+        return !hashmap_contains(&data, key, djb2(key->chars)) ||
+            *(int*)hashmap_get(&data, key, djb2(key->chars)) == value;
     }
 
     int sue1 = 0;

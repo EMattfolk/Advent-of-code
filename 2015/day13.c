@@ -33,14 +33,14 @@ char* solve_day_13(char* input) {
 		string persons[2] = { to_string(person_a), to_string(person_b) };
 		for (int i = 0; i < 2; i++) {
 			string *person = &persons[i];
-			if (!hashmap_contains(&name_to_index, person, djb2(person))) {
-				hashmap_put(&name_to_index, person, &people_count, djb2(person));
+			if (!hashmap_contains(&name_to_index, person, djb2(person->chars))) {
+				hashmap_put(&name_to_index, person, &people_count, djb2(person->chars));
 				people_count++;
 			}
 		}
 
-		int ai = *(int*)hashmap_get(&name_to_index, persons + 0, djb2(persons + 0));
-		int bi = *(int*)hashmap_get(&name_to_index, persons + 1, djb2(persons + 1));
+		int ai = *(int*)hashmap_get(&name_to_index, persons + 0, djb2(persons[0].chars));
+		int bi = *(int*)hashmap_get(&name_to_index, persons + 1, djb2(persons[1].chars));
 
 		dist_table[ai][bi] = value;
 

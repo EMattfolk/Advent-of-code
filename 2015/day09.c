@@ -27,14 +27,14 @@ char* solve_day_09(char* input) {
 		string cities[2] = { to_string(city_a), to_string(city_b) };
 		for (int i = 0; i < 2; i++) {
 			string *city = &cities[i];
-			if (!hashmap_contains(&name_to_index, city, djb2(city))) {
-				hashmap_put(&name_to_index, city, &city_number, djb2(city));
+			if (!hashmap_contains(&name_to_index, city, djb2(city->chars))) {
+				hashmap_put(&name_to_index, city, &city_number, djb2(city->chars));
 				city_number++;
 			}
 		}
 
-		int ai = *(int*)hashmap_get(&name_to_index, cities + 0, djb2(cities + 0));
-		int bi = *(int*)hashmap_get(&name_to_index, cities + 1, djb2(cities + 1));
+		int ai = *(int*)hashmap_get(&name_to_index, cities + 0, djb2(cities[0].chars));
+		int bi = *(int*)hashmap_get(&name_to_index, cities + 1, djb2(cities[1].chars));
 
 		dist_table[ai][bi] = dist;
 		dist_table[bi][ai] = dist;
