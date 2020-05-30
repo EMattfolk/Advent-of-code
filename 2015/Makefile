@@ -14,7 +14,7 @@ run: $(TARGET)
 	time -p ./$(TARGET)
 
 clean:
-	rm $(TARGET)
+	rm -f $(TARGET)
 
 hash:
 	$(CC) $(CFLAGS) hashmap.c -o hashmap
