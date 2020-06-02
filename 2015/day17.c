@@ -1,6 +1,10 @@
 #include "stdio.h"
 #include "string.h"
 
+int day_17_cmp(const void* a, const void* b) {
+	return -(*(int*)a - *(int*)b);
+}
+
 char* solve_day_17(char* input) {
 
     int containers[30];
@@ -15,11 +19,7 @@ char* solve_day_17(char* input) {
         tok = strtok(NULL, "\n");
     }
 
-    int cmp(const void* a, const void* b) {
-        return -(*(int*)a - *(int*)b);
-    }
-
-    qsort(containers, container_count, sizeof(int), cmp);
+    qsort(containers, container_count, sizeof(int), day_17_cmp);
 
     int combinations1 = 0;
     int combinations2 = 0;
