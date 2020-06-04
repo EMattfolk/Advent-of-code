@@ -7,29 +7,29 @@ char* solve_day_25(char* input) {
 	int row = atoi(strtok(input, delim));
 	int col = atoi(strtok(NULL, delim));
 
-	void next(int *row, int *col) {
-		(*row)--;
-		(*col)++;
-
-		if (*row == 0) {
-			*row = *col;
-			*col = 1;
+	long powmod(long n, int e, long m) {
+		int res = 1;
+		while (e) {
+			if (e & 1) {
+				res = (res * n) % m;
+			}
+			n = (n * n) % m;
+			e /= 2;
 		}
+
+		return res;
 	}
 
-	int r = 1;
-	int c = 1;
+	int prow = row + col - 1;
+	int exp = prow * (prow + 1) / 2 - row;
 
 	long code = 20151125;
+	long mod = 33554393;
+	int e = 252533;
 
-	// Do pow mod here for that sweet O(log N)
+	int ans = (code * powmod(e, exp, mod) ) % mod;
 
-	while (r != row || c != col) {
-		next(&r, &c);
-		code = (code * 252533) % 33554393;
-	}
-
-	sprintf(input, "%ld, %d", code, row);
+	sprintf(input, "%d", ans);
 
     return input;
 }
