@@ -2,171 +2,190 @@
 #include "string.h"
 #include "stdlib.h"
 #include "stdint.h"
+#include "stddef.h"
+#include "stdbool.h"
+#include "time.h"
 
-// Constants are the integer part of the sines of integers (in radians) * 2^32.
-const uint32_t k[64] = {
-0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee ,
-0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501 ,
-0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be ,
-0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821 ,
-0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa ,
-0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8 ,
-0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed ,
-0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a ,
-0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c ,
-0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70 ,
-0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05 ,
-0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665 ,
-0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039 ,
-0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1 ,
-0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1 ,
-0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 };
- 
-// r specifies the per-round shift amounts
-const uint32_t r[] = {7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
-                      5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
-                      4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
-                      6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21};
- 
-// leftrotate function definition
-#define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
- 
-void to_bytes(uint32_t val, uint8_t *bytes)
-{
-    bytes[0] = (uint8_t) val;
-    bytes[1] = (uint8_t) (val >> 8);
-    bytes[2] = (uint8_t) (val >> 16);
-    bytes[3] = (uint8_t) (val >> 24);
+/* Function prototypes */
+
+#define BLOCK_LEN 64  // In bytes
+#define STATE_LEN 4  // In words
+
+void md5_hash(const uint8_t message[], size_t len, uint32_t hash[static STATE_LEN]);
+void md5_compress(uint32_t state[static STATE_LEN], const uint8_t block[static BLOCK_LEN]);
+
+/* Full message hasher */
+void md5_hash(const uint8_t message[], size_t len, uint32_t hash[static STATE_LEN]) {
+	hash[0] = UINT32_C(0x67452301);
+	hash[1] = UINT32_C(0xEFCDAB89);
+	hash[2] = UINT32_C(0x98BADCFE);
+	hash[3] = UINT32_C(0x10325476);
+	
+	#define LENGTH_SIZE 8  // In bytes
+	
+	size_t off;
+	for (off = 0; len - off >= BLOCK_LEN; off += BLOCK_LEN)
+		md5_compress(hash, &message[off]);
+	
+	uint8_t block[BLOCK_LEN] = {0};
+	size_t rem = len - off;
+	memcpy(block, &message[off], rem);
+	
+	block[rem] = 0x80;
+	rem++;
+	if (BLOCK_LEN - rem < LENGTH_SIZE) {
+		md5_compress(hash, block);
+		memset(block, 0, sizeof(block));
+	}
+	
+	block[BLOCK_LEN - LENGTH_SIZE] = (uint8_t)((len & 0x1FU) << 3);
+	len >>= 5;
+	for (int i = 1; i < LENGTH_SIZE; i++, len >>= 8)
+		block[BLOCK_LEN - LENGTH_SIZE + i] = (uint8_t)(len & 0xFFU);
+	md5_compress(hash, block);
 }
- 
-uint32_t to_int32(const uint8_t *bytes)
-{
-    return (uint32_t) bytes[0]
-        | ((uint32_t) bytes[1] << 8)
-        | ((uint32_t) bytes[2] << 16)
-        | ((uint32_t) bytes[3] << 24);
-}
- 
-void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
- 
-    // These vars will contain the hash
-    uint32_t h0, h1, h2, h3;
- 
-    // Message (to prepare)
-    uint8_t *msg = NULL;
- 
-    size_t new_len, offset;
-    uint32_t w[16];
-    uint32_t a, b, c, d, i, f, g, temp;
- 
-    // Initialize variables - simple count in nibbles:
-    h0 = 0x67452301;
-    h1 = 0xefcdab89;
-    h2 = 0x98badcfe;
-    h3 = 0x10325476;
- 
-    //Pre-processing:
-    //append "1" bit to message    
-    //append "0" bits until message length in bits ≡ 448 (mod 512)
-    //append length mod (2^64) to message
- 
-    for (new_len = initial_len + 1; new_len % (512/8) != 448/8; new_len++)
-        ;
- 
-    msg = (uint8_t*)malloc(new_len + 8);
-    memcpy(msg, initial_msg, initial_len);
-    msg[initial_len] = 0x80; // append the "1" bit; most significant bit is "first"
-    for (offset = initial_len + 1; offset < new_len; offset++)
-        msg[offset] = 0; // append "0" bits
- 
-    // append the len in bits at the end of the buffer.
-    to_bytes(initial_len*8, msg + new_len);
-    // initial_len>>29 == initial_len*8>>32, but avoids overflow.
-    to_bytes(initial_len>>29, msg + new_len + 4);
- 
-    // Process the message in successive 512-bit chunks:
-    //for each 512-bit chunk of message:
-    for(offset=0; offset<new_len; offset += (512/8)) {
- 
-        // break chunk into sixteen 32-bit words w[j], 0 ≤ j ≤ 15
-        for (i = 0; i < 16; i++)
-            w[i] = to_int32(msg + offset + i*4);
- 
-        // Initialize hash value for this chunk:
-        a = h0;
-        b = h1;
-        c = h2;
-        d = h3;
- 
-        // Main loop:
-        for(i = 0; i<64; i++) {
- 
-            if (i < 16) {
-                f = (b & c) | ((~b) & d);
-                g = i;
-            } else if (i < 32) {
-                f = (d & b) | ((~d) & c);
-                g = (5*i + 1) % 16;
-            } else if (i < 48) {
-                f = b ^ c ^ d;
-                g = (3*i + 5) % 16;          
-            } else {
-                f = c ^ (b | (~d));
-                g = (7*i) % 16;
-            }
- 
-            temp = d;
-            d = c;
-            c = b;
-            b = b + LEFTROTATE((a + f + k[i] + w[g]), r[i]);
-            a = temp;
- 
-        }
- 
-        // Add this chunk's hash to result so far:
-        h0 += a;
-        h1 += b;
-        h2 += c;
-        h3 += d;
- 
-    }
- 
-    // cleanup
-    free(msg);
- 
-    //var char digest[16] := h0 append h1 append h2 append h3 //(Output is in little-endian)
-    to_bytes(h0, digest);
-    to_bytes(h1, digest + 4);
-    to_bytes(h2, digest + 8);
-    to_bytes(h3, digest + 12);
+
+void md5_compress(uint32_t state[static 4], const uint8_t block[static 64]) {
+	#define LOADSCHEDULE(i)  \
+		schedule[i] = (uint32_t)block[i * 4 + 0] <<  0  \
+		            | (uint32_t)block[i * 4 + 1] <<  8  \
+		            | (uint32_t)block[i * 4 + 2] << 16  \
+		            | (uint32_t)block[i * 4 + 3] << 24;
+	
+	uint32_t schedule[16];
+	LOADSCHEDULE( 0)
+	LOADSCHEDULE( 1)
+	LOADSCHEDULE( 2)
+	LOADSCHEDULE( 3)
+	LOADSCHEDULE( 4)
+	LOADSCHEDULE( 5)
+	LOADSCHEDULE( 6)
+	LOADSCHEDULE( 7)
+	LOADSCHEDULE( 8)
+	LOADSCHEDULE( 9)
+	LOADSCHEDULE(10)
+	LOADSCHEDULE(11)
+	LOADSCHEDULE(12)
+	LOADSCHEDULE(13)
+	LOADSCHEDULE(14)
+	LOADSCHEDULE(15)
+	
+	#define ROTL32(x, n)  (((0U + (x)) << (n)) | ((x) >> (32 - (n))))  // Assumes that x is uint32_t and 0 < n < 32
+	#define ROUND0(a, b, c, d, k, s, t)  ROUND_TAIL(a, b, d ^ (b & (c ^ d)), k, s, t)
+	#define ROUND1(a, b, c, d, k, s, t)  ROUND_TAIL(a, b, c ^ (d & (b ^ c)), k, s, t)
+	#define ROUND2(a, b, c, d, k, s, t)  ROUND_TAIL(a, b, b ^ c ^ d        , k, s, t)
+	#define ROUND3(a, b, c, d, k, s, t)  ROUND_TAIL(a, b, c ^ (b | ~d)     , k, s, t)
+	#define ROUND_TAIL(a, b, expr, k, s, t)    \
+		a = 0U + a + (expr) + UINT32_C(t) + schedule[k];  \
+		a = 0U + b + ROTL32(a, s);
+	
+	uint32_t a = state[0];
+	uint32_t b = state[1];
+	uint32_t c = state[2];
+	uint32_t d = state[3];
+	
+	ROUND0(a, b, c, d,  0,  7, 0xD76AA478)
+	ROUND0(d, a, b, c,  1, 12, 0xE8C7B756)
+	ROUND0(c, d, a, b,  2, 17, 0x242070DB)
+	ROUND0(b, c, d, a,  3, 22, 0xC1BDCEEE)
+	ROUND0(a, b, c, d,  4,  7, 0xF57C0FAF)
+	ROUND0(d, a, b, c,  5, 12, 0x4787C62A)
+	ROUND0(c, d, a, b,  6, 17, 0xA8304613)
+	ROUND0(b, c, d, a,  7, 22, 0xFD469501)
+	ROUND0(a, b, c, d,  8,  7, 0x698098D8)
+	ROUND0(d, a, b, c,  9, 12, 0x8B44F7AF)
+	ROUND0(c, d, a, b, 10, 17, 0xFFFF5BB1)
+	ROUND0(b, c, d, a, 11, 22, 0x895CD7BE)
+	ROUND0(a, b, c, d, 12,  7, 0x6B901122)
+	ROUND0(d, a, b, c, 13, 12, 0xFD987193)
+	ROUND0(c, d, a, b, 14, 17, 0xA679438E)
+	ROUND0(b, c, d, a, 15, 22, 0x49B40821)
+	ROUND1(a, b, c, d,  1,  5, 0xF61E2562)
+	ROUND1(d, a, b, c,  6,  9, 0xC040B340)
+	ROUND1(c, d, a, b, 11, 14, 0x265E5A51)
+	ROUND1(b, c, d, a,  0, 20, 0xE9B6C7AA)
+	ROUND1(a, b, c, d,  5,  5, 0xD62F105D)
+	ROUND1(d, a, b, c, 10,  9, 0x02441453)
+	ROUND1(c, d, a, b, 15, 14, 0xD8A1E681)
+	ROUND1(b, c, d, a,  4, 20, 0xE7D3FBC8)
+	ROUND1(a, b, c, d,  9,  5, 0x21E1CDE6)
+	ROUND1(d, a, b, c, 14,  9, 0xC33707D6)
+	ROUND1(c, d, a, b,  3, 14, 0xF4D50D87)
+	ROUND1(b, c, d, a,  8, 20, 0x455A14ED)
+	ROUND1(a, b, c, d, 13,  5, 0xA9E3E905)
+	ROUND1(d, a, b, c,  2,  9, 0xFCEFA3F8)
+	ROUND1(c, d, a, b,  7, 14, 0x676F02D9)
+	ROUND1(b, c, d, a, 12, 20, 0x8D2A4C8A)
+	ROUND2(a, b, c, d,  5,  4, 0xFFFA3942)
+	ROUND2(d, a, b, c,  8, 11, 0x8771F681)
+	ROUND2(c, d, a, b, 11, 16, 0x6D9D6122)
+	ROUND2(b, c, d, a, 14, 23, 0xFDE5380C)
+	ROUND2(a, b, c, d,  1,  4, 0xA4BEEA44)
+	ROUND2(d, a, b, c,  4, 11, 0x4BDECFA9)
+	ROUND2(c, d, a, b,  7, 16, 0xF6BB4B60)
+	ROUND2(b, c, d, a, 10, 23, 0xBEBFBC70)
+	ROUND2(a, b, c, d, 13,  4, 0x289B7EC6)
+	ROUND2(d, a, b, c,  0, 11, 0xEAA127FA)
+	ROUND2(c, d, a, b,  3, 16, 0xD4EF3085)
+	ROUND2(b, c, d, a,  6, 23, 0x04881D05)
+	ROUND2(a, b, c, d,  9,  4, 0xD9D4D039)
+	ROUND2(d, a, b, c, 12, 11, 0xE6DB99E5)
+	ROUND2(c, d, a, b, 15, 16, 0x1FA27CF8)
+	ROUND2(b, c, d, a,  2, 23, 0xC4AC5665)
+	ROUND3(a, b, c, d,  0,  6, 0xF4292244)
+	ROUND3(d, a, b, c,  7, 10, 0x432AFF97)
+	ROUND3(c, d, a, b, 14, 15, 0xAB9423A7)
+	ROUND3(b, c, d, a,  5, 21, 0xFC93A039)
+	ROUND3(a, b, c, d, 12,  6, 0x655B59C3)
+	ROUND3(d, a, b, c,  3, 10, 0x8F0CCC92)
+	ROUND3(c, d, a, b, 10, 15, 0xFFEFF47D)
+	ROUND3(b, c, d, a,  1, 21, 0x85845DD1)
+	ROUND3(a, b, c, d,  8,  6, 0x6FA87E4F)
+	ROUND3(d, a, b, c, 15, 10, 0xFE2CE6E0)
+	ROUND3(c, d, a, b,  6, 15, 0xA3014314)
+	ROUND3(b, c, d, a, 13, 21, 0x4E0811A1)
+	ROUND3(a, b, c, d,  4,  6, 0xF7537E82)
+	ROUND3(d, a, b, c, 11, 10, 0xBD3AF235)
+	ROUND3(c, d, a, b,  2, 15, 0x2AD7D2BB)
+	ROUND3(b, c, d, a,  9, 21, 0xEB86D391)
+	
+	state[0] = 0U + state[0] + a;
+	state[1] = 0U + state[1] + b;
+	state[2] = 0U + state[2] + c;
+	state[3] = 0U + state[3] + d;
 }
 
 char* solve_day_04(char* input) {
 
 	input[strlen(input) - 1] = '\0';
 
-	char buf[64];
+	void swap_endian(uint32_t *n) {
+		*n = ((*n>>24)&0xff) | ((*n<<8)&0xff0000) | ((*n>>8)&0xff00) | ((*n<<24)&0xff000000);
+	}
+
+	char input_buf[64];
+	uint32_t buf[STATE_LEN];
 
 	int i = 0;
-	char comp[] = "111111";
+	uint32_t cmp = 0;
+
 	do {
 		i++;
-		sprintf(buf, "%s%d", input, i);
-		//printf("%s\n", buf);
-		md5((uint8_t*)buf, strlen(buf), (uint8_t*)buf);
-		sprintf(comp, "%02X%02X%02X", (uint8_t)buf[0], (uint8_t)buf[1], (uint8_t)buf[2]);
-		//printf("%s\n", comp);
-	} while (comp[0] != '0' || comp[1] != '0' || comp[2] != '0' || comp[3] != '0' || comp[4] != '0');
+		sprintf(input_buf, "%s%d", input, i);
+		md5_hash((uint8_t*)input_buf, strlen(input_buf), buf);
+		cmp = buf[0];
+		swap_endian(&cmp);
+	} while (cmp & 0xfffff000);
+
 	int ans1 = i;
 
 	do {
 		i++;
-		sprintf(buf, "%s%d", input, i);
-		//printf("%s\n", buf);
-		md5((uint8_t*)buf, strlen(buf), (uint8_t*)buf);
-		sprintf(comp, "%02X%02X%02X", (uint8_t)buf[0], (uint8_t)buf[1], (uint8_t)buf[2]);
-		//printf("%s\n", comp);
-	} while (comp[0] != '0' || comp[1] != '0' || comp[2] != '0' || comp[3] != '0' || comp[4] != '0' || comp[5] != '0');
+		sprintf(input_buf, "%s%d", input, i);
+		md5_hash((uint8_t*)input_buf, strlen(input_buf), buf);
+		cmp = buf[0];
+		swap_endian(&cmp);
+	} while (cmp & 0xffffff00);
 
 	int ans2 = i;
 
