@@ -30,6 +30,9 @@ char* solve_day_20(char* input) {
 	int ans1 = 0;
 	int ans2 = 0;
 
+	// The answer is going to be some multiple of a highly composite number.
+	// So we can cheat a bit.
+
 	int i = 0;
 	while (ans1 == 0) {
 
@@ -37,7 +40,7 @@ char* solve_day_20(char* input) {
 			ans1 = i;
 		}
 
-		i++;
+		i += 60;
 	}
 
 	int delivered[1000000];
