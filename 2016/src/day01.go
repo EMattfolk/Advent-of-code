@@ -4,6 +4,7 @@ import (
     "fmt"
     "strings"
     "strconv"
+    . "../utils"
 )
 
 type point struct {
@@ -30,14 +31,6 @@ func (p *point) Add(o point) {
 
 func (p point) Mul(scale int) point {
     return point{p.x * scale, p.y * scale}
-}
-
-func Abs(n int) int {
-    if (n < 0) {
-        return -n
-    }
-
-    return n
 }
 
 func Solve01(input string) string {

@@ -38,6 +38,8 @@ func main() {
         src.Solve25,
     }
 
+    fmt.Println()
+
     for day, fn := range days {
         day += 1
 
@@ -54,4 +56,6 @@ func main() {
             fmt.Printf("Day %2d: %8.3fms - %s\n", day, millis, answers)
         }
     }
+
+    fmt.Println()
 }
