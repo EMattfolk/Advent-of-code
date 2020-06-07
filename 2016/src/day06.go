@@ -1,12 +1,12 @@
 package src
 
 import (
-	"fmt"
+    "fmt"
 )
 
 func Solve06(input string) string {
-	var ans1 int
-	var ans2 int
+    var ans1 int
+    var ans2 int
 
-	return fmt.Sprintf("%d, %d", ans1, ans2)
+    return fmt.Sprintf("%d, %d", ans1, ans2)
 }
