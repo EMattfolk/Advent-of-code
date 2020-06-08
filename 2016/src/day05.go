@@ -11,7 +11,7 @@ func Solve05(input string) string {
     var ans1 string
     var ans2 string
 
-    passw2 := [8]string{"", "", "", "", "", "", "", ""}
+    passw2 := [8]string{}
     passw2_remaining := 8
 
     i := 0
