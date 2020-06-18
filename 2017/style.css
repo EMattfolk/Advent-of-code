@@ -1,0 +1,34 @@
+body {
+    color: #cccccc;
+    background-color: #0f0f23;
+    font-family: monospace;
+}
+
+h1 {
+    color: #00cc00;
+    text-shadow: 0 0 8px #00cc00;
+}
+
+button {
+    display: inline-block;
+    font-size: 1em;
+    padding: 0.5em;
+    border-style: solid;
+    border-color: #cccccc;
+    border-width: 2px;
+    border-radius: 5px;
+    color: inherit;
+    background-color: inherit;
+}
+
+ul {
+    font-size: 2em;
+    list-style-type: none;
+}
+
+li::before {
+    content: "•";
+    padding-right: 1em;
+    color: #ffff66;
+    text-shadow: 0 0 8px #ffff66;
+}
