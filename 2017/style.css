@@ -26,9 +26,18 @@ ul {
     list-style-type: none;
 }
 
-li::before {
+#first::before {
     content: "•";
-    padding-right: 1em;
+    padding-left: 1em;
+    padding-right: 0.5em;
+    color: #9999cc;
+    text-shadow: 0 0 8px #9999cc;
+}
+
+#second::before {
+    content: "•";
+    padding-left: 1em;
+    padding-right: 0.5em;
     color: #ffff66;
     text-shadow: 0 0 8px #ffff66;
 }
