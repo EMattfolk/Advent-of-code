@@ -22,10 +22,10 @@ button.addEventListener("click", () => {
         }
 
         let ansEntry = document.createElement("li");
-        ansEntry.innerHTML = day + ": " + elapsed.toFixed(3) + "ms";
-        ansEntry.innerHTML += "<span id=\"first\">" + ans[0] + "</span>";
+        ansEntry.innerHTML = day + ": " + elapsed.toFixed(3) + "ms ";
+        ansEntry.innerHTML += "<code id=\"first\">" + ans[0] + "</code>";
         if (ans.length == 2) {
-            ansEntry.innerHTML += "<span id=\"second\">" + ans[1] + "</span>";
+            ansEntry.innerHTML += " <code id=\"second\">" + ans[1] + "</code>";
         }
 
         results.appendChild(ansEntry);
