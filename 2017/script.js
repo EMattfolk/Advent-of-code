@@ -21,13 +21,16 @@ button.addEventListener("click", () => {
             return;
         }
 
-        let ansEntry = document.createElement("li");
-        ansEntry.innerHTML = day + ": " + elapsed.toFixed(3) + "ms ";
+        let ansEntry = document.createElement("pre");
+        ansEntry.innerHTML += (day < 10 ? " " : "") + day + ": ";
+        ansEntry.innerHTML += ("   " + elapsed.toFixed(3)).slice(-8) + "ms ";
         ansEntry.innerHTML += "<code id=\"first\">" + ans[0] + "</code>";
         if (ans.length == 2) {
             ansEntry.innerHTML += " <code id=\"second\">" + ans[1] + "</code>";
         }
 
-        results.appendChild(ansEntry);
+        let listEntry = document.createElement("li");
+        listEntry.appendChild(ansEntry);
+        results.appendChild(listEntry);
     })
 });

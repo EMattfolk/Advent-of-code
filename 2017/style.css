@@ -26,6 +26,10 @@ ul {
     list-style-type: none;
 }
 
+pre {
+    margin: 0;
+}
+
 #first::before {
     content: "•";
     padding-left: 1em;
