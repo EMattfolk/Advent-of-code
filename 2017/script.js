@@ -12,7 +12,7 @@ button.addEventListener("click", () => {
             .then(response => response.text())
             .then(text => {
                 elapsed = performance.now();
-                let ans = fn(text.trim())
+                let ans = fn(day !== 19 ? text.trim() : text)
                 elapsed = performance.now() - elapsed;
                 return ans;
             });
