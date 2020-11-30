@@ -8,3 +8,4 @@ programming language for each of the events.
 * 2017 - JavaScript
 * 2018 - Python
 * 2019 - C++
+* 2020 - Rust
