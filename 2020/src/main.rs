@@ -2,12 +2,16 @@ use std::fs;
 use std::time::SystemTime;
 
 mod day01;
+mod day02;
 
 fn main() {
 
-    let days = 1;
+    let days = 2;
 
-    let day_fns = [day01::solve];
+    let day_fns = [
+        day01::solve,
+        day02::solve,
+    ];
 
     for i in 0..days {
         let day = i + 1;
