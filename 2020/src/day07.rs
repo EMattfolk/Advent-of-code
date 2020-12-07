@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::str::SplitWhitespace;
 
 fn bags_inside(current: usize, bags: &Vec<Vec<(usize, usize)>>) -> usize {
     let mut tot = 0;
@@ -10,6 +11,10 @@ fn bags_inside(current: usize, bags: &Vec<Vec<(usize, usize)>>) -> usize {
     tot
 }
 
+fn get_color(words: &mut SplitWhitespace) -> String {
+    words.next().unwrap().to_owned() + words.next().unwrap()
+}
+
 pub fn solve(input: String) -> String {
     let mut colors = HashMap::new();
     let lines: Vec<_> = input.lines().collect();
@@ -18,23 +23,22 @@ pub fn solve(input: String) -> String {
 
     for line in &lines {
         let mut words = line.split_whitespace();
-        colors.insert(words.next().unwrap().to_owned() + words.next().unwrap(), colors.len());
+        colors.insert(get_color(&mut words), colors.len());
         outer.push(Vec::new());
         inner.push(Vec::new());
     }
 
     for line in &lines {
         let mut words = line.split_whitespace();
-        let o = colors[&(words.next().unwrap().to_owned() + words.next().unwrap())];
+        let o = colors[&get_color(&mut words)];
 
         let mut n = words.nth(2);
         while n.is_some() && n.unwrap() != "no" {
-            let i = colors[&(words.next().unwrap().to_owned() + words.next().unwrap())];
+            let i = colors[&get_color(&mut words)];
             let count: usize = n.unwrap().parse().unwrap();
             outer[i].push(o);
             inner[o].push((count, i));
-            words.next();
-            n = words.next();
+            n = words.nth(1);
         }
     }
 
