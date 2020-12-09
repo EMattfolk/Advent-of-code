@@ -9,10 +9,11 @@ mod day05;
 mod day06;
 mod day07;
 mod day08;
+mod day09;
 
 fn main() {
 
-    let days = 8;
+    let days = 9;
 
     let day_fns = [
         day01::solve,
@@ -23,6 +24,7 @@ fn main() {
         day06::solve,
         day07::solve,
         day08::solve,
+        day09::solve,
     ];
 
     for i in 0..days {
