@@ -5,7 +5,7 @@ pub fn solve(input: String) -> String {
         .collect();
 
     adapters.push(0);
-    adapters.sort_unstable();
+    adapters.sort();
     adapters.push(adapters[adapters.len()-1] + 3);
 
     let mut ones = 0;
