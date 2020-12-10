@@ -6,20 +6,17 @@ pub fn solve(input: String) -> String {
         .map(|n| n.parse().unwrap())
         .collect();
 
+    'search:
     for i in 25..numbers.len() {
-        let mut found = false;
-        'outer: for j in i-25..i {
+        for j in i-25..i {
             for k in j+1..i {
                 if numbers[j] + numbers[k] == numbers[i] {
-                    found = true;
-                    break 'outer;
+                    continue 'search;
                 }
             }
         }
-        if !found {
-            ans1 = numbers[i];
-            break;
-        }
+        ans1 = numbers[i];
+        break;
     }
 
     let mut cum_sum: Vec<u64> = vec![0];
