@@ -12,10 +12,9 @@ mod day08;
 mod day09;
 mod day10;
 mod day11;
+mod day12;
 
 fn main() {
-
-    let days = 11;
 
     let day_fns = [
         day01::solve,
@@ -29,9 +28,10 @@ fn main() {
         day09::solve,
         day10::solve,
         day11::solve,
+        day12::solve,
     ];
 
-    for i in 0..days {
+    for i in 0..day_fns.len() {
         let day = i + 1;
         let day_input = fs::read_to_string(format!("input/day{:02}.txt", day))
             .unwrap()
@@ -41,6 +41,6 @@ fn main() {
         let ans = day_fns[i](day_input);
         let elapsed = st.elapsed().unwrap().as_nanos() as f64 / 1000000.0;
 
-        println!("Day {:>2}: {:.3}ms - {}", day, elapsed, ans);
+        println!("Day {:>2}: {:8.3}ms - {}", day, elapsed, ans);
     }
 }
