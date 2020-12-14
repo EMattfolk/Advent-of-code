@@ -16,7 +16,7 @@ pub fn solve(input: String) -> String {
     let mut or_mask: u64  = 0b000000000000000000000000000000000000;
 
     let mut mem = [0; 100000];
-    let mut mem2 = HashMap::new();
+    let mut mem2 = HashMap::with_capacity(100000);
     let mut variable = Vec::new();
 
     for l in input.lines() {
