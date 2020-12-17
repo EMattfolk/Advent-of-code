@@ -4,9 +4,10 @@ fn add_neighbors3(pos: &(i8, i8, i8, i8), neighbors: &mut HashMap<(i8, i8, i8, i
     for ox in -1..=1 {
         for oy in -1..=1 {
             for oz in -1..=1 {
-                if ox == oy && oy == oz && oz == 0 { continue; }
                 let npos = (pos.0 + ox, pos.1 + oy, pos.2 + oz, 0);
-                *neighbors.entry(npos).or_insert(0) += 1;
+                let entry = neighbors.entry(npos).or_insert(0);
+                if ox == oy && oy == oz && oz == 0 { continue; }
+                *entry += 1;
             }
         }
     }
@@ -17,9 +18,10 @@ fn add_neighbors4(pos: &(i8, i8, i8, i8), neighbors: &mut HashMap<(i8, i8, i8, i
         for oy in -1..=1 {
             for oz in -1..=1 {
                 for ow in -1..=1 {
-                    if ox == oy && oy == oz && oz == ow && ow == 0 { continue; }
                     let npos = (pos.0 + ox, pos.1 + oy, pos.2 + oz, pos.3 + ow);
-                    *neighbors.entry(npos).or_insert(0) += 1;
+                    let entry = neighbors.entry(npos).or_insert(0);
+                    if ox == oy && oy == oz && oz == ow && ow == 0 { continue; }
+                    *entry += 1;
                 }
             }
         }
@@ -51,15 +53,6 @@ fn run_iters(mut space: HashMap<(i8, i8, i8, i8), bool>, use_fourth: bool) -> u3
                 *space_entry = *count == 3;
             }
         }
-
-        // Lone active
-        for pos in space.keys().cloned().collect::<Vec<_>>() {
-            let space_entry = space.entry(pos).or_insert(false);
-            if *space_entry && !neighbors.contains_key(&pos) {
-                *space_entry = false;
-            }
-        }
-
     }
 
     space.iter().map(|(_, active)| *active as u32).sum()
