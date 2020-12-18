@@ -6,38 +6,34 @@ fn mult(a: u64, b: u64) -> u64 {
     a * b
 }
 
-fn eval_expression(tokens: &Vec<&str>, mut i: usize) -> (usize, u64) {
+fn eval_expression(tokens: &mut core::slice::Iter<'_, &str>) -> u64 {
+    let tok = tokens.next().unwrap();
     let mut v = 
-        if tokens[i] == "(" {
-            let res = eval_expression(tokens, i+1);
-            i = res.0;
-            res.1
+        if tok == &"(" {
+            eval_expression(tokens)
         } else {
-            i += 1;
-            tokens[i-1].parse().unwrap()
+            tok.parse().unwrap()
         };
 
-    while i < tokens.len() && tokens[i] != ")" {
+    while let Some(tok) = tokens.next() {
+        if tok == &")" { break; }
         let f =
-            if tokens[i] == "+" {
+            if tok == &"+" {
                 plus
             } else {
                 mult
             };
 
-        i += 1;
+        let tok = tokens.next().unwrap();
 
-        if tokens[i] == "(" {
-            let res = eval_expression(tokens, i+1);
-            i = res.0;
-            v = f(v, res.1);
+        if tok == &"(" {
+            v = f(v, eval_expression(tokens));
         } else {
-            v = f(v, tokens[i].parse().unwrap());
-            i += 1;
+            v = f(v, tok.parse().unwrap());
         }
     }
 
-    return (i+1, v);
+    v
 }
 
 fn find_matching(tokens: &Vec<&str>, mut i: usize, dir: bool) -> usize {
@@ -60,9 +56,9 @@ pub fn solve(input: String) -> String {
     let mut ans2 = 0;
     for line in input.lines() {
         let line = line.replace("(", "( ").replace(")", " )");
-        let mut tokens = line.split_whitespace().collect();
+        let mut tokens: Vec<_> = line.split_whitespace().collect();
 
-        ans1 += eval_expression(&tokens, 0).1;
+        ans1 += eval_expression(&mut tokens.iter());
 
         let mut i = 0;
         while i < tokens.len() {
@@ -85,7 +81,7 @@ pub fn solve(input: String) -> String {
             i += 1;
         }
 
-        ans2 += eval_expression(&tokens, 0).1;
+        ans2 += eval_expression(&mut tokens.iter());
     }
 
     format!("{}, {}", ans1, ans2)
