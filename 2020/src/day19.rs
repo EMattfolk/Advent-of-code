@@ -34,7 +34,7 @@ fn create_regex2(i: usize, rules: &Vec<Rule>) -> String {
     } else if i == 11 {
         let r42 = create_regex(42, rules);
         let r31 = create_regex(31, rules);
-        return format!("({0}({0}({0}({0}({0}({0}({0}{1})?{1})?{1})?{1})?{1})?{1})?{1})", r42, r31);
+        return format!("({0}({0}({0}({0}{1})?{1})?{1})?{1})", r42, r31);
     }
 
     if let Some(c) = rules[i].term {

@@ -5,7 +5,6 @@ pub fn solve(input: String) -> String {
         .collect();
 
     let mut seen = vec![-1; 30000000];
-    let mut spoken = vec![false; 30000000];
     let mut turn = 0;
     let mut last = 0;
     let mut last_spoken = false;
@@ -17,13 +16,11 @@ pub fn solve(input: String) -> String {
             } else if !last_spoken {
                 0
             } else {
-                turn - 1 - seen[last as usize]
+                turn - seen[last as usize]
             };
 
-        seen[last as usize] = turn - 1;
-
-        last_spoken = spoken[current as usize];
-        spoken[current as usize] = true;
+        seen[last as usize] = turn;
+        last_spoken = seen[current as usize] != -1;
 
         last = current;
         turn += 1;
@@ -36,13 +33,11 @@ pub fn solve(input: String) -> String {
             if !last_spoken {
                 0
             } else {
-                turn - 1 - seen[last as usize]
+                turn - seen[last as usize]
             };
 
-        seen[last as usize] = turn - 1;
-
-        last_spoken = spoken[current as usize];
-        spoken[current as usize] = true;
+        seen[last as usize] = turn;
+        last_spoken = seen[current as usize] != -1;
 
         last = current;
         turn += 1;
