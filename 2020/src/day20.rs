@@ -1,4 +1,7 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
+
+type Adjacent = HashMap<(u32, Transform),
+                        (HashSet<(u32, Transform)>, HashSet<(u32, Transform)>)>;
 
 const TILE_SIZE: usize = 10;
 const TILE_SIZE_I: i32 = TILE_SIZE as i32;
@@ -39,7 +42,7 @@ const TRANSFORMS: [Transform; 8] = [
 ];
 const GRID_SIZE: usize = 12;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 struct Tile {
     id: u32,
     grid: Vec<Vec<char>>,
@@ -67,7 +70,7 @@ impl Tile {
     //}
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq, Default)]
 struct Transform {
     offset: (i32, i32),
     matrix: ((i32, i32), (i32, i32)),
@@ -83,7 +86,7 @@ impl Transform {
     }
 }
 
-fn fill_grid(grid: &mut Vec<Vec<Tile>>, tiles: &mut Vec<Tile>, x: usize, y: usize) -> bool {
+fn fill_grid(grid: &mut Vec<Vec<Tile>>, tiles: &mut HashMap<u32, Tile>, adjacent: &Adjacent, x: usize, y: usize) -> bool {
     if x == 0 && y == GRID_SIZE {
         return true;
     }
@@ -91,31 +94,53 @@ fn fill_grid(grid: &mut Vec<Vec<Tile>>, tiles: &mut Vec<Tile>, x: usize, y: usiz
     let nx = (x + 1) % GRID_SIZE;
     let ny = y + (x + 1) / GRID_SIZE;
 
-    for i in (0..tiles.len()).rev() {
-        'tloop: for t in &TRANSFORMS {
-            tiles[i].transform = *t;
-
-            if x > 0 {
-                for k in 0..TILE_SIZE - 1 {
-                    if grid[y][x-1].get(TILE_SIZE - 1, k) != tiles[i].get(0, k) {
-                        continue 'tloop;
-                    }
-                }
-            }
-
-            if y > 0 {
-                for k in 0..TILE_SIZE - 1 {
-                    if grid[y-1][x].get(k, TILE_SIZE - 1) != tiles[i].get(k, 0) {
-                        continue 'tloop;
-                    }
-                }
-            }
-
-            grid[y].push(tiles.remove(i));
-            if fill_grid(grid, tiles, nx, ny) {
+    if x == 0 && y == 0 {
+        for (id, t) in adjacent.keys() {
+            let mut tile = tiles.remove(id).unwrap();
+            tile.transform = *t;
+            grid[y].push(tile);
+            if fill_grid(grid, tiles, adjacent, nx, ny) {
                 return true;
             }
-            tiles.insert(i, grid[y].pop().unwrap());
+            tiles.insert(*id, grid[y].pop().unwrap());
+        }
+    } else if x == 0 {
+        let above = &grid[y-1][x];
+        for (id, t) in (adjacent[&(above.id, above.transform)].0).iter() {
+            if !tiles.contains_key(id) { continue; }
+            let mut tile = tiles.remove(id).unwrap();
+            tile.transform = *t;
+            grid[y].push(tile);
+            if fill_grid(grid, tiles, adjacent, nx, ny) {
+                return true;
+            }
+            tiles.insert(*id, grid[y].pop().unwrap());
+        }
+    } else if y == 0 {
+        let beside = &grid[y][x-1];
+        for (id, t) in (adjacent[&(beside.id, beside.transform)].1).iter() {
+            if !tiles.contains_key(id) { continue; }
+            let mut tile = tiles.remove(id).unwrap();
+            tile.transform = *t;
+            grid[y].push(tile);
+            if fill_grid(grid, tiles, adjacent, nx, ny) {
+                return true;
+            }
+            tiles.insert(*id, grid[y].pop().unwrap());
+        }
+    } else {
+        let above = &grid[y-1][x];
+        let beside = &grid[y][x-1];
+        for (id, t) in (adjacent[&(beside.id, beside.transform)].1)
+                       .intersection(&adjacent[&(above.id, above.transform)].0) {
+            if !tiles.contains_key(id) { continue; }
+            let mut tile = tiles.remove(id).unwrap();
+            tile.transform = *t;
+            grid[y].push(tile);
+            if fill_grid(grid, tiles, adjacent, nx, ny) {
+                return true;
+            }
+            tiles.insert(*id, grid[y].pop().unwrap());
         }
     }
 
@@ -123,7 +148,8 @@ fn fill_grid(grid: &mut Vec<Vec<Tile>>, tiles: &mut Vec<Tile>, x: usize, y: usiz
 }
 
 pub fn solve(input: String) -> String {
-    let mut tiles = Vec::new();
+    let mut tiles: HashMap<u32, Tile> = HashMap::new();
+    let mut ids = Vec::new();
 
     let mut lines = input.lines();
 
@@ -137,8 +163,54 @@ pub fn solve(input: String) -> String {
             }
         }
 
-        tiles.push(Tile{id: id, grid: grid, transform: TRANSFORMS[0]});
+        tiles.insert(id, Tile{id: id, grid: grid, transform: TRANSFORMS[0]});
+        ids.push(id);
         lines.next();
+    }
+
+    let mut adjacent: Adjacent = HashMap::new();
+
+    for i in 0..ids.len() {
+        for tr1 in &TRANSFORMS {
+            tiles.entry(ids[i]).or_default().transform = *tr1;
+            let mut lower = HashSet::new();
+            let mut beside = HashSet::new();
+            for j in 0..ids.len() {
+                if i == j { continue; }
+
+                for tr2 in &TRANSFORMS {
+                    tiles.entry(ids[j]).or_default().transform = *tr2;
+
+                    let t1 = &tiles[&ids[i]];
+                    let t2 = &tiles[&ids[j]];
+
+                    let mut ok = true;
+                    for k in 0..TILE_SIZE {
+                        if t1.get(k, TILE_SIZE - 1) != t2.get(k, 0) {
+                            ok = false;
+                            break;
+                        }
+                    }
+
+                    if ok {
+                        lower.insert((t2.id, *tr2));
+                    }
+
+                    ok = true;
+                    for k in 0..TILE_SIZE {
+                        if t1.get(TILE_SIZE - 1, k) != t2.get(0, k) {
+                            ok = false;
+                            break;
+                        }
+                    }
+
+                    if ok {
+                        beside.insert((t2.id, *tr2));
+                    }
+                }
+            }
+            adjacent.insert((tiles[&ids[i]].id, *tr1), (lower, beside));
+        }
     }
 
     //for t in &TRANSFORMS {
@@ -149,7 +221,7 @@ pub fn solve(input: String) -> String {
 
     let mut grid = vec![Vec::with_capacity(GRID_SIZE); GRID_SIZE];
 
-    fill_grid(&mut grid, &mut tiles, 0, 0);
+    fill_grid(&mut grid, &mut tiles, &adjacent, 0, 0);
 
     let ans1 = (grid[0][0].id as u64)
              * (grid[0][11].id as u64)
