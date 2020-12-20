@@ -94,54 +94,30 @@ fn fill_grid(grid: &mut Vec<Vec<Tile>>, tiles: &mut HashMap<u32, Tile>, adjacent
     let nx = (x + 1) % GRID_SIZE;
     let ny = y + (x + 1) / GRID_SIZE;
 
-    if x == 0 && y == 0 {
-        for (id, t) in adjacent.keys() {
-            let mut tile = tiles.remove(id).unwrap();
-            tile.transform = *t;
-            grid[y].push(tile);
-            if fill_grid(grid, tiles, adjacent, nx, ny) {
-                return true;
-            }
-            tiles.insert(*id, grid[y].pop().unwrap());
+    let it: Vec<_> =
+        if x == 0 && y == 0 {
+            adjacent.keys().collect()
+        } else if x == 0 {
+            let above = &grid[y-1][x];
+            (adjacent[&(above.id, above.transform)].0).iter().collect()
+        } else if y == 0 {
+            let beside = &grid[y][x-1];
+            (adjacent[&(beside.id, beside.transform)].1).iter().collect()
+        } else {
+            let above = &grid[y-1][x];
+            let beside = &grid[y][x-1];
+            (adjacent[&(beside.id, beside.transform)].1)
+               .intersection(&adjacent[&(above.id, above.transform)].0).collect()
+        };
+
+    for (id, t) in it {
+        let mut tile = tiles.remove(id).unwrap();
+        tile.transform = *t;
+        grid[y].push(tile);
+        if fill_grid(grid, tiles, adjacent, nx, ny) {
+            return true;
         }
-    } else if x == 0 {
-        let above = &grid[y-1][x];
-        for (id, t) in (adjacent[&(above.id, above.transform)].0).iter() {
-            if !tiles.contains_key(id) { continue; }
-            let mut tile = tiles.remove(id).unwrap();
-            tile.transform = *t;
-            grid[y].push(tile);
-            if fill_grid(grid, tiles, adjacent, nx, ny) {
-                return true;
-            }
-            tiles.insert(*id, grid[y].pop().unwrap());
-        }
-    } else if y == 0 {
-        let beside = &grid[y][x-1];
-        for (id, t) in (adjacent[&(beside.id, beside.transform)].1).iter() {
-            if !tiles.contains_key(id) { continue; }
-            let mut tile = tiles.remove(id).unwrap();
-            tile.transform = *t;
-            grid[y].push(tile);
-            if fill_grid(grid, tiles, adjacent, nx, ny) {
-                return true;
-            }
-            tiles.insert(*id, grid[y].pop().unwrap());
-        }
-    } else {
-        let above = &grid[y-1][x];
-        let beside = &grid[y][x-1];
-        for (id, t) in (adjacent[&(beside.id, beside.transform)].1)
-                       .intersection(&adjacent[&(above.id, above.transform)].0) {
-            if !tiles.contains_key(id) { continue; }
-            let mut tile = tiles.remove(id).unwrap();
-            tile.transform = *t;
-            grid[y].push(tile);
-            if fill_grid(grid, tiles, adjacent, nx, ny) {
-                return true;
-            }
-            tiles.insert(*id, grid[y].pop().unwrap());
-        }
+        tiles.insert(*id, grid[y].pop().unwrap());
     }
 
     return false;
