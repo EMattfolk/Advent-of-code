@@ -24,6 +24,7 @@ mod day20;
 mod day21;
 mod day22;
 mod day23;
+mod day24;
 
 fn main() {
 
@@ -51,6 +52,7 @@ fn main() {
         day21::solve,
         day22::solve,
         day23::solve,
+        day24::solve,
     ];
 
     for i in 0..day_fns.len() {

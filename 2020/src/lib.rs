@@ -2,7 +2,7 @@ use std::ops::Add;
 use std::ops::Mul;
 use std::ops::AddAssign;
 
-#[derive(Debug, Hash, Copy, Clone, PartialEq)]
+#[derive(Debug, Hash, Copy, Clone, PartialEq, Eq)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
