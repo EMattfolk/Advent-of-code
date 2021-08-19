@@ -9,3 +9,4 @@ programming language for each of the events.
 * 2018 - Python
 * 2019 - C++
 * 2020 - Rust
+* 2021 - [Sylt](https://github.com/FredTheDino/sylt-lang)
