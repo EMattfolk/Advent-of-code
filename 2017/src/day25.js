@@ -43,7 +43,6 @@ export default function solve25(input) {
         states.push(createState(write0, move0, state0, write1, move1, state1));
     }
 
-    console.log(steps);
     for (let i = 0; i < steps; i++) {
         states[state]();
     }
