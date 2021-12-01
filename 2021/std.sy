@@ -1,0 +1,19 @@
+IO :: blob {
+    open: fn str, str -> File,
+    lines: fn str -> [str],
+}
+
+File :: blob {
+    read: fn *, str -> str,
+    close: fn * -> void,
+}
+
+io: IO : external
+tonumber: fn str -> int : external
+
+read_file :: fn file -> str
+    fp :: io.open(file, "r")
+    content :: fp.read(fp, "*a")
+    fp.close(fp)
+    ret content
+end
