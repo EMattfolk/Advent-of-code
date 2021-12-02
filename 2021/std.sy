@@ -8,12 +8,22 @@ File :: blob {
     close: fn * -> void,
 }
 
+OS :: blob {
+    clock: fn -> float,
+}
+
 io: IO : external
+os: OS : external
 tonumber: fn str -> int : external
 
 read_file :: fn file -> str
+    // TODO: File existence guards
     fp :: io.open(file, "r")
     content :: fp.read(fp, "*a")
     fp.close(fp)
     ret content
+end
+
+process_time :: fn -> float
+    ret os.clock()
 end

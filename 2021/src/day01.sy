@@ -1,13 +1,13 @@
 use /std
 
 solve :: fn input -> (str, str) do
-    nums :: split(input)
+    nums :: split(input) -> map(std.tonumber)
     higher1 := 0
-    current := std.tonumber(nums[0])
+    current := nums[0]
 
     i := 0
     loop i < len(nums) do
-        new :: std.tonumber(nums[i])
+        new :: nums[i]
         if new > current do
             higher1 += 1
         end
@@ -16,10 +16,10 @@ solve :: fn input -> (str, str) do
     end
 
     higher2 := 0
-    current = std.tonumber(nums[0]) + std.tonumber(nums[1]) + std.tonumber(nums[2])
+    current = nums[0] + nums[1] + nums[2]
     i = 0
     loop i < len(nums) - 2 do
-        new :: std.tonumber(nums[i + 0]) + std.tonumber(nums[i + 1]) + std.tonumber(nums[i + 2])
+        new :: nums[i + 0] + nums[i + 1] + nums[i + 2]
         if new > current do
             higher2 += 1
         end

@@ -1,10 +1,28 @@
-use /std
+use std
 from src/day01 use solve as solve01
 from src/day02 use solve as solve02
 
+solutions :: [solve01, solve02]
+
 start :: fn do
-    day01 :: std.read_file("input/day01.txt")
-    print(solve01(day01))
-    day02 :: std.read_file("input/day02.txt")
-    print(solve02(day02))
+
+    inputs :: []
+    i := 0
+    loop i < len(solutions) do
+        num := ("0" if i+1 < 10 else "") + as_str(i+1)
+        inputs -> push' std.read_file("input/day" + num + ".txt")
+        i += 1
+    end
+
+    i := 0
+    loop i < len(solutions) do
+        start :: std.process_time()
+        res :: solutions[i](inputs[i])
+        elapsed :: std.process_time() - start
+
+        day :: i + 1
+        print("Day " + as_str(day) + ": " + as_str(elapsed) + " - " + as_str(res))
+
+        i += 1
+    end
 end
