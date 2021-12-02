@@ -1,0 +1,28 @@
+use /std
+
+solve :: fn input -> (str, str) do
+    input :: split(input)
+
+    x := 0
+    y1 := 0
+    y2 := 0
+    aim := 0
+
+    i := 0
+    loop i < len(input) do
+        value :: std.tonumber(input[i+1])
+        if input[i] == "forward" do
+            x += value
+            y2 += aim * value
+        else if input[i] == "up" do
+            y1 -= value
+            aim -= value
+        else if input[i] == "down" do
+            y1 += value
+            aim += value
+        end
+        i += 2
+    end
+
+    (as_str(x * y1), as_str(x * y2))
+end

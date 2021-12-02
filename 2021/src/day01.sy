@@ -1,0 +1,31 @@
+use /std
+
+solve :: fn input -> (str, str) do
+    nums :: split(input)
+    higher1 := 0
+    current := std.tonumber(nums[0])
+
+    i := 0
+    loop i < len(nums) do
+        new :: std.tonumber(nums[i])
+        if new > current do
+            higher1 += 1
+        end
+        current = new
+        i += 1
+    end
+
+    higher2 := 0
+    current = std.tonumber(nums[0]) + std.tonumber(nums[1]) + std.tonumber(nums[2])
+    i = 0
+    loop i < len(nums) - 2 do
+        new :: std.tonumber(nums[i + 0]) + std.tonumber(nums[i + 1]) + std.tonumber(nums[i + 2])
+        if new > current do
+            higher2 += 1
+        end
+        current = new
+        i += 1
+    end
+
+    (as_str(higher1), as_str(higher2))
+end
