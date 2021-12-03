@@ -33,16 +33,14 @@ solve :: fn input -> (str, str) do
 
     gamma := []
     epsilon := []
-    i := 0
-    loop i < length do
-        if counts[i] > len(lines) / 2 do
+    counts -> for_each' fn count do
+        if count > len(lines) / 2 do
             gamma -> push' ONE
             epsilon -> push' ZERO
         else do
             gamma -> push' ZERO
             epsilon -> push' ONE
         end
-        i += 1
     end
 
     count_pos :: fn l: [[int]], p -> int do // Type is eaten?
