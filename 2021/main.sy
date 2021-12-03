@@ -1,8 +1,13 @@
 use std
 from src/day01 use solve as solve01
 from src/day02 use solve as solve02
+from src/day03 use solve as solve03
 
-solutions :: [solve01, solve02]
+solutions :: [
+    solve01,
+    solve02,
+    solve03,
+]
 
 start :: fn do
 

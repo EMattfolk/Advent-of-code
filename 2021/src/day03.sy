@@ -1,0 +1,90 @@
+use /std
+
+ONE :: 49
+ZERO :: 48
+
+bin_to_int :: fn bin: [int] -> int
+    bin -> fold' 0, fn d, acc ->
+        acc * 2 + d - ZERO
+    end
+end
+
+solve :: fn input -> (str, str) do
+    lines :: split(input) -> map(as_chars)
+    length :: len(lines[0])
+
+    counts :: []
+
+    i := 0
+    loop i < length do
+        counts -> push' 0
+        i += 1
+    end
+
+    lines -> for_each' fn line do
+        i := 0
+        loop i < length do
+            if line[i] == ONE do
+                counts[i] += 1
+            end
+            i += 1
+        end
+    end
+
+    gamma := []
+    epsilon := []
+    i := 0
+    loop i < length do
+        if counts[i] > len(lines) / 2 do
+            gamma -> push' ONE
+            epsilon -> push' ZERO
+        else do
+            gamma -> push' ZERO
+            epsilon -> push' ONE
+        end
+        i += 1
+    end
+
+    count_pos :: fn l: [[int]], p -> int do // Type is eaten?
+        count := 0
+        l -> for_each' fn line do
+            if line[p] == ONE do
+                count += 1
+            end
+        end
+        count
+    end
+
+    filter_pos :: fn l: [[int]], p, e -> [[int]] do
+        l -> filter' fn line: [int] -> line[p] == e end
+    end
+
+    i := 0
+    oxygen := lines
+    loop len(oxygen) > 1 do
+        count :: count_pos(oxygen, i)
+        if count >= len(oxygen) - count do
+            oxygen = filter_pos(oxygen, i, ONE)
+        else do
+            oxygen = filter_pos(oxygen, i, ZERO)
+        end
+        i += 1
+    end
+
+    i := 0
+    co2 := lines
+    loop len(co2) > 1 do
+        count :: count_pos(co2, i)
+        if count >= len(co2) - count do
+            co2 = filter_pos(co2, i, ZERO)
+        else do
+            co2 = filter_pos(co2, i, ONE)
+        end
+        i += 1
+    end
+
+    (
+        as_str(bin_to_int(gamma) * bin_to_int(epsilon)),
+        as_str(bin_to_int(oxygen[0]) * bin_to_int(co2[0]))
+    )
+end
