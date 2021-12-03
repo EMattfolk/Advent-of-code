@@ -1,7 +1,8 @@
-use /std
+from std use split, map, len, as_str
+use /st
 
 solve :: fn input -> (str, str) do
-    nums :: split(input) -> map(std.tonumber)
+    nums :: split(input) -> map(st.tonumber)
     higher1 := 0
     current := nums[0]
 

@@ -1,4 +1,5 @@
-use /std
+from std use split, len, as_str
+use /st
 
 solve :: fn input -> (str, str) do
     input :: split(input)
@@ -10,7 +11,7 @@ solve :: fn input -> (str, str) do
 
     i := 0
     loop i < len(input) do
-        value :: std.tonumber(input[i+1])
+        value :: st.tonumber(input[i+1])
         if input[i] == "forward" do
             x += value
             y2 += aim * value

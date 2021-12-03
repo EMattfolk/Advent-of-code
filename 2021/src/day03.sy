@@ -1,3 +1,4 @@
+from std use fold, map, split, as_str, filter, as_chars, len, push, for_each
 use /std
 
 ONE :: 49
