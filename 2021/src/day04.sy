@@ -1,0 +1,124 @@
+from std use as_char, as_chars, split, for_each, print, len, push, min, max, as_str
+use /st
+
+ZERO :: as_char("0")
+COMMA :: as_char(",")
+
+solve :: fn input -> (str, str) do
+    input := split(input)
+
+    // Parse the initial comma separated numbers
+    nums := {:}
+    current := 0
+    count := 0
+    as_chars(input[0]) -> for_each' fn char do
+        if char == COMMA do
+            nums[current] = count
+            current = 0
+            count += 1
+        else do
+            current *= 10
+            current += char - ZERO
+        end
+    end
+
+    // Last one
+    nums[current] = count
+
+    // Create the boards
+    boards := []
+    i := 1
+    loop i < len(input) do
+        boards -> push' st.tonumber(input[i])
+        i += 1
+    end
+
+    // Return which turn the board wins on
+    wins :: fn board -> int
+        low := 100
+
+        row := 0
+        loop row < 5 do
+            high := 0
+            col := 0
+            loop col < 5 do
+                high = max(high, nums[boards[25 * board + 5 * row + col]])
+                col += 1
+            end
+            low = min(low, high)
+            row += 1
+        end
+
+        col := 0
+        loop col < 5 do
+            high := 0
+            row := 0
+            loop row < 5 do
+                high = max(high, nums[boards[25 * board + 5 * row + col]])
+                row += 1
+            end
+            low = min(low, high)
+            col += 1
+        end
+
+        low
+    end
+
+    // Find the best and worst board
+    best1 := 100
+    best_board1 := -1
+    best2 := 0
+    best_board2 := -1
+    board := 0
+    loop board * 25 < len(boards) do
+
+        mrc := wins(board)
+        if mrc < best1 do
+            best1 = mrc
+            best_board1 = board
+        end
+
+        mrc = wins(board)
+        if mrc > best2 do
+            best2 = mrc
+            best_board2 = board
+        end
+
+        board += 1
+    end
+
+    // Find the winning number
+    winning1 := 0
+    winning2 := 0
+    i := 0
+    loop i < 100 do
+        if nums[i] == best1 do
+            winning1 = i
+        else if nums[i] == best2 do
+            winning2 = i
+        end
+        i += 1
+    end
+
+    // Sum up unmarked
+    sum1 := 0
+    sum2 := 0
+    row := 0
+    loop row < 5 do
+        col := 0
+        loop col < 5 do
+            num := boards[25 * best_board1 + 5 * row + col]
+            if nums[num] > best1 do
+                sum1 += num
+            end
+            num = boards[25 * best_board2 + 5 * row + col]
+            if nums[num] > best2 do
+                sum2 += num
+            end
+            col += 1
+        end
+        row += 1
+    end
+
+    (as_str(sum1 * winning1), as_str(sum2 * winning2))
+end

@@ -4,11 +4,13 @@ from std use len, as_str, push, print
 from src/day01 use solve as solve01
 from src/day02 use solve as solve02
 from src/day03 use solve as solve03
+from src/day04 use solve as solve04
 
 solutions :: [
     solve01,
     solve02,
     solve03,
+    solve04,
 ]
 
 start :: fn do
