@@ -1,0 +1,100 @@
+from std use as_char, as_chars, as_str, for_each, push, split, len, print, sign
+use /st
+
+ZERO :: as_char("0")
+COMMA :: as_char(",")
+
+comma_separated :: fn s -> [int] do
+    values := []
+    current := 0
+    as_chars(s) -> for_each' fn char do
+        if char == COMMA do
+            values -> push' current
+            current = 0
+        else do
+            current *= 10
+            current += char - ZERO
+        end
+    end
+    values -> push' current
+    ret values
+end
+
+solve :: fn input -> (str, str) do
+    input := split(input)
+
+    grid := []
+    i := 0
+    loop i < 1000 do
+        grid -> push' []
+        j := 0
+        loop j < 1000 do
+            grid[i] -> push' 0
+            j += 1
+        end
+        i += 1
+    end
+
+    overlaps := 0
+
+    insert_point :: fn x, y do
+        grid[y][x] += 1
+        if grid[y][x] == 2 do
+            overlaps += 1
+        end
+    end
+
+    i := 0
+    loop i < len(input) do
+        a := comma_separated(input[i])
+        i += 2
+        b := comma_separated(input[i])
+
+        if a[0] == b[0] or a[1] == b[1] do
+            x := a[0]
+            y := a[1]
+            dx :: sign(b[0] - a[0])
+            dy :: sign(b[1] - a[1])
+
+            // We assume it is not a point (dx == dy == 0)
+            loop x != b[0] or y != b[1] do
+                insert_point(x, y)
+                x += dx
+                y += dy
+            end
+            insert_point(x, y)
+        end
+
+        i += 1
+    end
+
+    res1 :: overlaps
+
+    i := 0
+    loop i < len(input) do
+        a := comma_separated(input[i])
+        i += 2
+        b := comma_separated(input[i])
+
+        dx :: sign(b[0] - a[0])
+        dy :: sign(b[1] - a[1])
+        if dx != 0 and dy != 0 do
+            x := a[0]
+            y := a[1]
+
+            // We assume it is not a point (dx == dy == 0)
+            loop x != b[0] or y != b[1] do
+                insert_point(x, y)
+                x += dx
+                y += dy
+            end
+            insert_point(x, y)
+        end
+
+        i += 1
+    end
+
+    res2 :: overlaps
+
+    (as_str(res1), as_str(res2))
+end
