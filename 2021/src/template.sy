@@ -1,4 +1,5 @@
 use /st
 
 solve :: fn input -> (str, str) do
+    ("", "")
 end

@@ -1,24 +1,5 @@
 from std use as_char, as_chars, as_str, for_each, push, split, len, print, sign
-use /st
-
-ZERO :: as_char("0")
-COMMA :: as_char(",")
-
-comma_separated :: fn s -> [int] do
-    values := []
-    current := 0
-    as_chars(s) -> for_each' fn char do
-        if char == COMMA do
-            values -> push' current
-            current = 0
-        else do
-            current *= 10
-            current += char - ZERO
-        end
-    end
-    values -> push' current
-    ret values
-end
+from /st use comma_separated
 
 solve :: fn input -> (str, str) do
     input := split(input)
