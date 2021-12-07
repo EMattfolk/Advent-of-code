@@ -14,8 +14,13 @@ OS :: blob {
     clock: fn -> float,
 }
 
+Table :: blob {
+    sort: fn [int] -> void,
+}
+
 io: IO : external
 os: OS : external
+table: Table : external
 tonumber: fn str -> int : external
 
 read_file :: fn file -> str
@@ -47,4 +52,8 @@ comma_separated :: fn s -> [int] do
     end
     values -> push' current
     ret values
+end
+
+sort :: fn list: [int] do
+    table.sort(list)
 end

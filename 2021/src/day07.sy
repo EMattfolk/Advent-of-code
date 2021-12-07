@@ -1,0 +1,29 @@
+from std use print, len, abs, fold, as_str, split, max, min, floor
+use /st
+
+solve :: fn input -> (str, str) do
+    input := st.comma_separated(split(input)[0])
+    st.sort(input)
+    middle :: input[len(input) / 2]
+    fuel1 :: fn elem, acc -> acc + abs(elem - middle) end
+    res1 :: input -> fold' 0, fuel1
+
+    mi :: input -> fold' 100000, min
+    ma :: input -> fold' 0, max
+
+    fuel2 :: fn pos ->
+        input -> fold' 0, fn elem, acc ->
+            diff :: abs(elem - pos)
+            acc + diff * (diff + 1) / 2
+        end
+    end
+
+    res2 := fuel2' floor((mi + ma) / 2)
+    i := mi
+    loop i <= ma do
+        res2 = min(res2, fuel2(i))
+        i += 1
+    end
+
+    (as_str(res1), as_str(res2))
+end
