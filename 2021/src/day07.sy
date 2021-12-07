@@ -1,4 +1,4 @@
-from std use print, len, abs, fold, as_str, split, max, min, floor
+from std use print, len, abs, fold, as_str, split, max, min, floor, unsafe_force
 use /st
 
 solve :: fn input -> (str, str) do
@@ -18,12 +18,8 @@ solve :: fn input -> (str, str) do
         end
     end
 
-    res2 := fuel2' floor((mi + ma) / 2)
-    i := mi
-    loop i <= ma do
-        res2 = min(res2, fuel2(i))
-        i += 1
-    end
+    avg :: floor((input -> fold' 0, fn a, b -> a + b end) / len(input))
+    res2 := min(min(fuel2(avg - 1), fuel2(avg)), fuel2(avg + 1))
 
     (as_str(res1), as_str(res2))
 end
