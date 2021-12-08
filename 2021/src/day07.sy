@@ -1,25 +1,18 @@
-from std use print, len, abs, fold, as_str, split, max, min, floor, unsafe_force
+from std use len, abs, fold, as_str, split, floor
 use /st
 
 solve :: fn input -> (str, str) do
     input := st.comma_separated(split(input)[0])
     st.sort(input)
-    middle :: input[len(input) / 2]
-    fuel1 :: fn elem, acc -> acc + abs(elem - middle) end
-    res1 :: input -> fold' 0, fuel1
 
-    mi :: input -> fold' 100000, min
-    ma :: input -> fold' 0, max
-
-    fuel2 :: fn pos ->
-        input -> fold' 0, fn elem, acc ->
-            diff :: abs(elem - pos)
-            acc + diff * (diff + 1) / 2
-        end
-    end
+    median :: input[len(input) / 2]
+    res1 :: input -> fold' 0, fn elem, acc -> acc + abs(elem - median) end
 
     avg :: floor((input -> fold' 0, fn a, b -> a + b end) / len(input))
-    res2 := min(min(fuel2(avg - 1), fuel2(avg)), fuel2(avg + 1))
+    res2 := input -> fold' 0, fn elem, acc ->
+            diff :: abs(elem - avg)
+            acc + diff * (diff + 1) / 2
+        end
 
     (as_str(res1), as_str(res2))
 end
