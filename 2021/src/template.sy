@@ -1,3 +1,4 @@
+from std use split, print
 use /st
 
 solve :: fn input -> (str, str) do
