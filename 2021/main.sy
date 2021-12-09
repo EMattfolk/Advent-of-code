@@ -40,7 +40,11 @@ start :: fn do
         elapsed :: st.process_time() - start
 
         day :: i + 1
-        print("Day " + as_str(day) + ": " + as_str(elapsed) + " - " + as_str(res))
+        print(
+            st.format("Day %2d: ", day)
+            + st.format("%8.3fms - ", elapsed * 1000.0)
+            + as_str(res)
+        )
 
         i += 1
     end

@@ -18,9 +18,14 @@ Table :: blob {
     sort: fn [int] -> void,
 }
 
+String :: blob {
+    format: fn str, * -> str,
+}
+
 io: IO : external
 os: OS : external
 table: Table : external
+string: String : external
 tonumber: fn str -> int : external
 
 read_file :: fn file -> str
@@ -56,4 +61,8 @@ end
 
 sort :: fn list: [int] do
     table.sort(list)
+end
+
+format :: fn fmt: str, value: * -> str do
+    ret string.format(fmt, value)
 end
