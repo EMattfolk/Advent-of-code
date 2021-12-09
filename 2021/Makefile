@@ -7,5 +7,5 @@ TARGET := /tmp/aoc21.lua
 .PHONY: run
 
 run:
-	@$(SYLT) -c $(TARGET) $(SRC)
+	@$(SYLT) --output $(TARGET) $(SRC)
 	@$(LUA) $(TARGET)
