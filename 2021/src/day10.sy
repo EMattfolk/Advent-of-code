@@ -44,9 +44,7 @@ solve :: fn input -> (str, str) do
             if current == LP or current == LB or current == LC or current == LT do
                 stack -> push' current
             else do
-                top :: stack -> pop()
-                opposite := MATCHING[top]
-                if opposite != current do
+                if MATCHING[stack -> pop()] != current do
                     res1 += SCORE[current]
                     ret
                 end
