@@ -11,6 +11,7 @@ from src/day07 use solve as solve07
 from src/day08 use solve as solve08
 from src/day09 use solve as solve09
 from src/day10 use solve as solve10
+from src/day11 use solve as solve11
 
 solutions :: [
     solve01,
@@ -23,6 +24,7 @@ solutions :: [
     solve08,
     solve09,
     solve10,
+    solve11,
 ]
 
 start :: fn do

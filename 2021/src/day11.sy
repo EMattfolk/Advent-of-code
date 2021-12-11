@@ -1,0 +1,96 @@
+from std use split, print, as_str, as_chars, as_char, map, len, for_each
+use /st
+
+ints :: fn line: str -> [int] do
+    ZERO :: as_char("0")
+    line -> as_chars() -> map(fn c -> c - ZERO end)
+end
+
+OFFSETS :: [
+    (-1, -1),
+    ( 1, -1),
+    (-1,  1),
+    ( 1,  1),
+    ( 0, -1),
+    ( 0,  1),
+    (-1,  0),
+    ( 1,  0),
+]
+
+solve :: fn input -> (str, str) do
+    grid :: input -> split() -> map(ints)
+
+    height := len(grid)
+    width := len(grid[0])
+
+    in_bounds :: fn r, c ->
+        0 <= r and r < height and 0 <= c and c < width
+    end
+
+    flashed :: grid -> map(fn l -> l -> map(fn _ -> -1 end) end)
+
+    res1 := 0
+    step :: fn n -> int do
+        flash := fn r, c do end // Recursive function workaround
+        flash = fn r, c do
+            if flashed[r][c] == n do
+                ret
+            end
+            flashed[r][c] = n
+
+            OFFSETS -> for_each' fn offset do
+                nr := r + offset[0]
+                nc := c + offset[1]
+                if in_bounds(nr, nc) do
+                    grid[nr][nc] += 1
+                    if grid[nr][nc] > 9 do
+                        flash(nr, nc)
+                    end
+                end
+            end
+        end
+
+        r := 0
+        loop r < height do
+            c := 0
+            loop c < width do
+                grid[r][c] += 1
+                if grid[r][c] > 9 do
+                    flash(r, c)
+                end
+                c += 1
+            end
+            r += 1
+        end
+
+        init :: res1
+        r := 0
+        loop r < height do
+            c := 0
+            loop c < width do
+                if grid[r][c] > 9 do
+                    grid[r][c] = 0
+                    res1 += 1
+                end
+                c += 1
+            end
+            r += 1
+        end
+
+        ret res1 - init
+    end
+
+    i := 0
+    loop i < 100 do
+        step(i)
+        i += 1
+    end
+
+    loop step(i) != width * height do
+        i += 1
+    end
+
+    res2 :: i + 1
+
+    (as_str(res1), as_str(res2))
+end
