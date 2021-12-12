@@ -1,6 +1,8 @@
-from std use split, print
+from std use split, print, as_str
 use /st
 
 solve :: fn input -> (str, str) do
-    ("", "")
+    res1 := 0
+    res2 := 0
+    (as_str(res1), as_str(res2))
 end

@@ -20,6 +20,7 @@ Table :: blob {
 
 String :: blob {
     format: fn str, * -> str,
+    gsub: fn str, str, str -> str,
 }
 
 io: IO : external
