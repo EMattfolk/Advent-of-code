@@ -1,0 +1,96 @@
+from std use split, print, as_str, as_char, as_chars, len, for_each, push, fold, add, max
+use /st
+use /main
+
+X :: as_char("x")
+Y :: as_char("y")
+ZERO :: as_char("0")
+
+fold_dir :: fn s -> (int, int) do
+    chars :: s -> as_chars()
+    num := 0
+    i := 2
+    loop i < len(chars) do
+        num *= 10
+        num += chars[i] - ZERO
+        i += 1
+    end
+
+    (chars[0], num)
+end
+
+do_fold :: fn dir, dots do
+    index := 0
+    if dir[0] == Y do
+        index = 1
+    end
+    pos := dir[1]
+    dots -> for_each' fn dot ->
+        if dot[index] > pos do
+            dot[index] = 2 * pos - dot[index]
+        end
+    end
+end
+
+solve :: fn input -> (str, str) do
+
+    lines :: split(input)
+    dots := []
+
+    i := 0
+    loop lines[i] != "fold" do
+        point :: st.comma_separated(lines[i])
+        dots -> push(point)
+        i += 1
+    end
+
+    do_fold(fold_dir(lines[i+2]), dots)
+    i += 3
+
+    uniq := dots -> fold' {}, fn dot, uniq ->
+                uniq -> add' as_str(dot)
+                uniq
+            end
+    res1 :: len(uniq)
+
+    loop i < len(lines) do
+        do_fold(fold_dir(lines[i+2]), dots)
+        i += 3
+    end
+
+    uniq = dots -> fold' {}, fn dot, uniq ->
+                uniq -> add' as_str(dot)
+                uniq
+            end
+
+    dim :: dots -> fold' [0, 0], fn dot, dim ->
+        dim[0] = max(dot[0], dim[0])
+        dim[1] = max(dot[1], dim[1])
+        dim
+    end
+
+    width :: dim[0]
+    height :: dim[1]
+
+    letters := ""
+    y := 0
+    loop y <= height do
+        out := ""
+        x := 0
+        loop x <= width do
+            if as_str([x, y]) in uniq do
+                out += "#"
+            else do
+                out += " "
+            end
+            x += 1
+        end
+        letters += "\n" + out
+        y += 1
+    end
+
+    main.extra = letters
+
+    res2 := "See extra"
+    (as_str(res1), res2)
+end
