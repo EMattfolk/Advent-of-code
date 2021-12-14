@@ -19,6 +19,7 @@ Table :: blob {
 }
 
 String :: blob {
+    char: fn int -> str,
     format: fn str, * -> str,
     gsub: fn str, str, str -> str,
 }
