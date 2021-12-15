@@ -1,0 +1,118 @@
+from std use split, print, as_str, len, as_char, as_chars, map, pop, for_each, push, prepend, floor, rem
+use /st
+
+ints :: fn line: str -> [int] do
+    ZERO :: as_char("0")
+    line -> as_chars() -> map(fn c -> c - ZERO end)
+end
+
+solve :: fn input -> (str, str) do
+
+    grid :: input -> split() -> map(ints)
+
+    width :: len(grid[0])
+    height :: len(grid)
+    width2 :: len(grid[0]) * 5
+    height2 :: len(grid) * 5
+
+    in_bounds :: fn x, y -> 0 <= x and x < width and 0 <= y and y < height end
+    in_bounds2 :: fn x, y -> 0 <= x and x < width2 and 0 <= y and y < height2 end
+
+    start :: (0, 0)
+    goal := (width - 1, height - 1)
+
+    visited := {:}
+    y := 0
+    loop y < height do
+        x := 0
+        loop x < width do
+            visited[as_str((x, y))] = 999999
+            x += 1
+        end
+        y += 1
+    end
+
+    res1 := 0
+    to_visit := [(0, start)]
+    loop len(to_visit) > 0 do
+        current := to_visit -> pop()
+
+        cost :: current[0]
+        pos :: current[1]
+
+        if visited[as_str(pos)] < cost do
+            continue
+        end
+
+        if pos == goal do
+            res1 = cost
+        end
+
+        x :: pos[0]
+        y :: pos[1]
+
+        [(1, 0), (-1, 0), (0, 1), (0, -1)] -> for_each' fn offset do
+            nx :: x + offset[0]
+            ny :: y + offset[1]
+            npos :: (nx, ny)
+            if in_bounds(nx, ny) do
+                ncost :: cost + grid[ny][nx]
+                if visited[as_str(npos)] > ncost do
+                    visited[as_str(npos)] = ncost
+                    to_visit -> prepend((ncost, npos))
+                end
+            end
+        end
+    end
+
+    y := 0
+    loop y < height2 do
+        x := 0
+        loop x < width2 do
+            visited[as_str((x, y))] = 999999
+            x += 1
+        end
+        y += 1
+    end
+
+    res2 := 0
+    goal = (width2 - 1, height2 - 1)
+    to_visit := [(0, start)]
+    loop len(to_visit) > 0 do
+        new_to_visit :: []
+        loop len(to_visit) > 0 do
+            current := to_visit -> pop()
+
+            cost :: current[0]
+            pos :: current[1]
+
+            if visited[as_str(pos)] < cost do
+                continue
+            end
+
+            if pos == goal do
+                res2 = cost
+            end
+
+            x :: pos[0]
+            y :: pos[1]
+
+            [(1, 0), (-1, 0), (0, 1), (0, -1)] -> for_each' fn offset do
+                nx :: x + offset[0]
+                ny :: y + offset[1]
+                npos :: (nx, ny)
+                if in_bounds2(nx, ny) do
+                    modifier :: floor(nx / width) + floor(ny / height)
+                    ncost :: cost + rem(grid[rem(ny, height)][rem(nx, width)] - 1 + modifier, 9) + 1
+                    if visited[as_str(npos)] > ncost do
+                        visited[as_str(npos)] = ncost
+                        new_to_visit -> push((ncost, npos))
+                    end
+                end
+            end
+        end
+        to_visit = new_to_visit
+    end
+
+    (as_str(res1), as_str(res2))
+end

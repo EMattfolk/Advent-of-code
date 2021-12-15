@@ -15,6 +15,7 @@ from src/day11 use solve as solve11
 from src/day12 use solve as solve12
 from src/day13 use solve as solve13
 from src/day14 use solve as solve14
+from src/day15 use solve as solve15
 
 solutions :: [
     solve01,
@@ -31,6 +32,7 @@ solutions :: [
     solve12,
     solve13,
     solve14,
+    solve15,
 ]
 
 extra := "" // For day 13
@@ -47,6 +49,11 @@ start :: fn do
 
     i := 0
     loop i < len(solutions) do
+        if i == 14 do // Skip day 15 because it is sloww
+            i += 1
+            continue
+        end
+
         start :: st.process_time()
         res :: solutions[i](inputs[i])
         elapsed :: st.process_time() - start

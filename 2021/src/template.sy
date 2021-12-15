@@ -1,4 +1,4 @@
-from std use split, print, as_str
+from std use split, print, as_str, len
 use /st
 
 solve :: fn input -> (str, str) do
