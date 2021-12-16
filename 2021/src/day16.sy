@@ -1,0 +1,106 @@
+from std use split, print, as_str, len, as_char, for_each, push, as_chars, min, max
+use /st
+
+i := 0
+
+conv := {
+    as_char("0"): [0, 0, 0, 0],
+    as_char("1"): [0, 0, 0, 1],
+    as_char("2"): [0, 0, 1, 0],
+    as_char("3"): [0, 0, 1, 1],
+    as_char("4"): [0, 1, 0, 0],
+    as_char("5"): [0, 1, 0, 1],
+    as_char("6"): [0, 1, 1, 0],
+    as_char("7"): [0, 1, 1, 1],
+    as_char("8"): [1, 0, 0, 0],
+    as_char("9"): [1, 0, 0, 1],
+    as_char("A"): [1, 0, 1, 0],
+    as_char("B"): [1, 0, 1, 1],
+    as_char("C"): [1, 1, 0, 0],
+    as_char("D"): [1, 1, 0, 1],
+    as_char("E"): [1, 1, 1, 0],
+    as_char("F"): [1, 1, 1, 1],
+}
+
+packet := []
+
+res1 := 0
+
+read_num :: fn bits -> int do
+    n := 0
+    j := 0
+    loop j < bits do
+        n *= 2
+        n += packet[i]
+        i += 1
+        j += 1
+    end
+
+    ret n
+end
+
+read_packet :: fn -> int do
+    res1 += read_num(3)
+    ty :: read_num(3)
+    if ty == 4 do
+        ret read_value(0)
+    else do
+        op := fn a, b -> int do -1 end
+        if ty == 0 do
+            op = fn a, b -> a + b end
+        else if ty == 1 do
+            op = fn a, b -> a * b end
+        else if ty == 2 do
+            op = min
+        else if ty == 3 do
+            op = max
+        else if ty == 5 do
+            op = fn a, b -> (1 if a > b else 0) end
+        else if ty == 6 do
+            op = fn a, b -> (1 if a < b else 0) end
+        else if ty == 7 do
+            op = fn a, b -> (1 if a == b else 0) end
+        end
+        id :: read_num(1)
+        if id == 0 do
+            length :: read_num(15)
+            goal :: i + length
+            acc := read_packet()
+            loop i < goal do
+                acc = op(acc, read_packet())
+            end
+            ret acc
+        else do
+            sub :: read_num(11)
+            acc := read_packet()
+            j := 1
+            loop j < sub do
+                acc = op(acc, read_packet())
+                j += 1
+            end
+            ret acc
+        end
+    end
+end
+
+read_value :: fn init -> int
+    more :: read_num(1)
+    curr :: read_num(4)
+    if more == 1 do
+        ret read_value(init * 16 + curr)
+    else do
+        ret init * 16 + curr
+    end
+end
+
+solve :: fn input -> (str, str) do
+    (input -> split())[0] -> as_chars() -> for_each' fn l do
+        conv[l] -> for_each' fn bit do
+            packet -> push(bit)
+        end
+    end
+
+    res2 := read_packet()
+
+    (as_str(res1), as_str(res2))
+end
