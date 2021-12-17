@@ -1,0 +1,45 @@
+from std use split, print, as_str, len, abs, map, max
+use /st
+
+triangle :: fn n: int -> n * (n + 1) / 2 end
+
+solve :: fn input -> (str, str) do
+    bounds :: input -> st.string.gsub("[^-0-9]", " ") -> split() -> map(st.tonumber)
+    lower_x :: bounds[0]
+    upper_x :: bounds[1]
+    lower_y :: bounds[2]
+    upper_y :: bounds[3]
+    res1 := triangle(abs(lower_y) - 1)
+
+    sim :: fn vx, vy -> bool do
+        vx := vx
+        vy := vy
+        x := 0
+        y := 0
+        loop x <= upper_x and y >= lower_y do
+            x += vx
+            y += vy
+            vx = max(vx - 1, 0)
+            vy -= 1
+            if lower_x <= x and x <= upper_x and lower_y <= y and y <= upper_y do
+                ret true
+            end
+        end
+
+        ret false
+    end
+
+    res2 := 0
+    vx := 0
+    loop vx <= upper_x do
+        vy := lower_y
+        loop vy <= -lower_y do
+            if sim(vx, vy) do
+                res2 += 1
+            end
+            vy += 1
+        end
+        vx += 1
+    end
+    (as_str(res1), as_str(res2))
+end
