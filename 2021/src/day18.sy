@@ -1,0 +1,141 @@
+from std use split, print, as_str, len, as_char, as_chars, map, push, for_each, floor, max
+use /st
+
+open :: as_char("[")
+comma :: as_char(",")
+close :: as_char("]")
+zero :: as_char("0")
+
+// Mutating
+extend :: fn a: [*], b: [*] do
+    b -> for_each' fn e do a -> push(e) end
+end
+
+add :: fn a, b -> [int] do
+    new := [open]
+    new -> extend(a)
+    new -> extend(b)
+
+    reduce(new)
+end
+
+reduce :: fn l -> [int] do
+    l := l
+    reducing := true
+    loop reducing do
+        res :: explode(l)
+        l = res[1]
+        if res[0] do
+            continue
+        end
+        res :: splits(l)
+        reducing = res[0]
+        l = res[1]
+    end
+    l
+end
+
+explode :: fn l -> (bool, [int]) do
+    prev := -1
+    carry := 0
+    new_l := []
+    i := 0
+    exploded := false
+
+    step := fn depth do end
+    step  = fn depth do
+        if l[i] != open do
+            prev = len(new_l)
+            new_l -> push(l[i] + carry)
+            i += 1
+            carry = 0
+        else if depth == 4 and not exploded do
+            i += 1
+            if prev != -1 do
+                new_l[prev] += l[i]
+            end
+            i += 1
+            carry = l[i]
+            i += 1
+
+            new_l -> push(0)
+            exploded = true
+        else do // open
+            new_l -> push(open)
+            i += 1
+            step(depth + 1)
+            step(depth + 1)
+        end
+    end
+
+    step(0)
+
+    (exploded, new_l)
+end
+
+splits :: fn l -> (bool, [int]) do
+    new_l := []
+    splitted := false
+    l -> for_each' fn e do
+        if e == open or e < 10 or splitted do
+            new_l -> push(e)
+        else do
+            splitted = true
+            new_l -> push(open)
+            new_l -> push(floor(e / 2))
+            new_l -> push(floor((e + 1) / 2))
+        end
+    end
+    (splitted, new_l)
+end
+
+magnitude :: fn p, i -> (int, int) do
+    if p[i] == open do
+        res1 :: magnitude(p, i + 1)
+        res2 :: magnitude(p, res1[0])
+        ret (res2[0], 3 * res1[1] + 2 * res2[1])
+    end
+    (i + 1, p[i])
+end
+
+solve :: fn input -> (str, str) do
+    input :: input -> split() -> map(as_chars) -> map' fn l -> [int] do
+        filtered := []
+        l -> for_each' fn c do
+            if c == close or c == comma do
+                ret
+            else if c == open do
+                filtered -> push' c
+            else do
+                filtered -> push' c - zero
+            end
+        end
+        filtered
+    end
+
+    sum := input[0]
+    i := 1
+    loop i < len(input) do
+        sum = add(sum, input[i])
+        i += 1
+    end
+
+    res1 := magnitude(sum, 0)[1]
+    res2 := 0
+
+    i := 0
+    loop i < len(input) do
+        j := 0
+        loop j < len(input) do
+            if j == i do
+                j += 1
+                continue
+            end
+            res2 = max(res2, magnitude(add(input[i], input[j]), 0)[1])
+            j += 1
+        end
+        i += 1
+    end
+
+    (as_str(res1), as_str(res2))
+end
