@@ -19,6 +19,8 @@ from src/day15 use solve as solve15
 from src/day16 use solve as solve16
 from src/day17 use solve as solve17
 from src/day18 use solve as solve18
+from src/day19 use solve as solve19
+from src/day20 use solve as solve20
 
 solutions :: [
     solve01,
@@ -39,6 +41,8 @@ solutions :: [
     solve16,
     solve17,
     solve18,
+    solve19,
+    solve20,
 ]
 
 extra := "" // For day 13
@@ -55,7 +59,7 @@ start :: fn do
 
     i := 0
     loop i < len(solutions) do
-        if i == 14 do // Skip day 15 because it is sloww
+        if i in [4, 14, 17, 19] do // Skip slow days
             i += 1
             continue
         end
