@@ -21,6 +21,8 @@ from src/day17 use solve as solve17
 from src/day18 use solve as solve18
 from src/day19 use solve as solve19
 from src/day20 use solve as solve20
+from src/day21 use solve as solve21
+from src/day22 use solve as solve22
 
 solutions :: [
     solve01,
@@ -43,6 +45,8 @@ solutions :: [
     solve18,
     solve19,
     solve20,
+    solve21,
+    solve22,
 ]
 
 extra := "" // For day 13
