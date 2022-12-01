@@ -1,7 +1,15 @@
 module Lib
-  ( someFunc,
+  ( (#),
+    (<#>),
   )
 where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+infixl 1 #
+
+infixl 1 <#>
+
+(#) :: a -> (a -> b) -> b
+v # f = f v
+
+(<#>) :: Functor f => f a -> (a -> b) -> f b
+v <#> f = fmap f v
