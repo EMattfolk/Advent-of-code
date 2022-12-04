@@ -6,11 +6,8 @@ import Lib
 solution :: String -> (String, String)
 solution input =
   let parse line =
-        let v1 = line # List.takeWhile (/= '-') # read
-            v2 = line # List.takeWhile (/= ',') # List.dropWhile (/= '-') # List.tail # read
-            v3 = line # List.dropWhile (/= ',') # List.tail # List.takeWhile (/= '-') # read
-            v4 = line # List.dropWhile (/= ',') # List.dropWhile (/= '-') # List.tail # read
-         in (v1, v2, v3, v4)
+        let pairs = line # split (\c -> c == '-' || c == ',') <#> read
+         in (pairs !! 0, pairs !! 1, pairs !! 2, pairs !! 3)
 
       parsed :: [(Int, Int, Int, Int)]
       parsed =
