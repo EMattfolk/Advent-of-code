@@ -6,8 +6,8 @@ import Lib
 
 solution :: String -> (String, String)
 solution input =
-  let windows n xs | length xs >= n = take n xs : windows n (drop 1 xs)
-      windows _ _ = []
+  let -- Assume list is infinite - go wroom
+      windows n xs = take n xs : windows n (drop 1 xs)
 
       findNDistinct :: Int -> Int
       findNDistinct n =
