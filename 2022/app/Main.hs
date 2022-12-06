@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Data.Foldable (traverse_)
-import Data.Time.Clock.System (SystemTime, getSystemTime, systemNanoseconds, systemSeconds)
+import System.CPUTime (getCPUTime)
 import qualified Day01
 import qualified Day02
 import qualified Day03
@@ -23,18 +23,17 @@ solutions =
 pad :: Char -> Int -> String -> String
 pad char width s = replicate (width - length s) char <> s
 
-diffNs :: SystemTime -> SystemTime -> Integer
+diffNs :: Integer -> Integer -> Integer
 diffNs st end =
-  toInteger (systemSeconds end - systemSeconds st) * 1000000000
-    + toInteger (systemNanoseconds end - systemNanoseconds st)
+  div (end - st) 1000
 
 runDay :: (String -> (String, String)) -> Int -> IO ()
 runDay solution day =
   do
     input <- readFile ("input/day" <> pad '0' 2 (show day) <> ".txt")
-    st <- getSystemTime
-    (a1, a2) <- pure (solution input)
-    end <- getSystemTime
+    st <- getCPUTime
+    (a1, a2) <- return (solution input)
+    end <- getCPUTime
     let timeDiffNs = diffNs st end
         out =
           "Day "
@@ -49,11 +48,11 @@ runDay solution day =
 
 main :: IO ()
 main = do
-  st <- getSystemTime
+  st <- getCPUTime
   solutions
     <#> runDay
     # zip [1 ..]
     # traverse_ (\(day, runner) -> runner day)
-  end <- getSystemTime
+  end <- getCPUTime
   putStrLn ""
   putStrLn ("Total: " <> show (div (diffNs st end) 1000) <> "μs")

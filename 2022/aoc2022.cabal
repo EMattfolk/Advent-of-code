@@ -40,7 +40,6 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
-    , time
     , unix
   default-language: Haskell2010
 
@@ -55,7 +54,6 @@ executable aoc2022-exe
       aoc2022
     , base >=4.7 && <5
     , containers
-    , time
     , unix
   default-language: Haskell2010
 
@@ -71,6 +69,5 @@ test-suite aoc2022-test
       aoc2022
     , base >=4.7 && <5
     , containers
-    , time
     , unix
   default-language: Haskell2010
