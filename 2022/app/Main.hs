@@ -8,6 +8,8 @@ import qualified Day03
 import qualified Day04
 import qualified Day05
 import qualified Day06
+import Control.Exception (evaluate)
+import Control.DeepSeq (force)
 import Lib
 
 solutions :: [String -> (String, String)]
@@ -32,7 +34,7 @@ runDay solution day =
   do
     input <- readFile ("input/day" <> pad '0' 2 (show day) <> ".txt")
     st <- getCPUTime
-    (a1, a2) <- return (solution input)
+    (a1, a2) <- evaluate $ force (solution input)
     end <- getCPUTime
     let timeDiffNs = diffNs st end
         out =
