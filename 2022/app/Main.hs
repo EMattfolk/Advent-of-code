@@ -7,6 +7,7 @@ import qualified Day02
 import qualified Day03
 import qualified Day04
 import qualified Day05
+import qualified Day06
 import Lib
 
 solutions :: [String -> (String, String)]
@@ -15,7 +16,8 @@ solutions =
     Day02.solution,
     Day03.solution,
     Day04.solution,
-    Day05.solution
+    Day05.solution,
+    Day06.solution
   ]
 
 pad :: Char -> Int -> String -> String
