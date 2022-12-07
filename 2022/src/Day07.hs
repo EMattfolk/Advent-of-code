@@ -11,8 +11,7 @@ data FileType
   deriving (Show)
 
 data Tree
-  = D [Tree]
-  | F Int
+  = D Int [Tree]
   deriving (Show)
 
 solution :: String -> (String, String)
@@ -52,51 +51,36 @@ solution input =
           # foldl accum ("", Map.empty)
           # snd
 
-      tree :: Tree
-      tree =
+      sizes :: [Int]
+      sizes =
         let build dir =
               parsed
                 # Map.lookup dir
-                <#> fmap
-                  ( \(name, ty) -> case ty of
-                      Dir -> build name
-                      File size -> F size
+                <#> foldl
+                  ( \(acc, contents) (name, ty) -> case ty of
+                      Dir ->
+                        let tr@(D size _) = build name
+                         in (acc + size, tr : contents)
+                      File size -> (acc + size, contents)
                   )
-                # fromMaybe []
-                # D
-         in build "/"
+                  (0, [])
+                # fromMaybe (-99999, [])
+                # (\(s, c) -> D s c)
 
-      sumMostTenThousand :: Tree -> (Int, Int)
-      sumMostTenThousand t =
-        case t of
-          D xs ->
-            xs
-              <#> sumMostTenThousand
-                # foldl (\(accTot, accCur) (tot, cur) -> (accTot + tot, accCur + cur)) (0, 0)
-                # (\(tot, cur) -> if cur <= 100000 then (tot + cur, cur) else (tot, cur))
-          F size -> (0, size)
+            flatten :: Tree -> [Int]
+            flatten (D size []) = [size]
+            flatten (D size dir) = size : List.concatMap flatten dir
+         in build "/" # flatten
 
-      ans1 = sumMostTenThousand tree
+      ans1 =
+        sizes
+          # filter (<= 100000)
+          # sum
 
-      spaceNeeded = 30000000 - (70000000 - snd ans1)
+      spaceNeeded = 30000000 - (70000000 - maximum sizes)
 
-      findSmallest :: Tree -> (Int, Int)
-      findSmallest t =
-        case t of
-          D xs ->
-            xs
-              <#> findSmallest
-                # foldl
-                  ( \(accTot, accCur) (tot, cur) ->
-                      (min accTot tot, accCur + cur)
-                  )
-                  (70000000, 0)
-                # ( \(tot, cur) ->
-                      if cur >= spaceNeeded
-                        then (min tot cur, cur)
-                        else (tot, cur)
-                  )
-          F size -> (70000000, size)
-
-      ans2 = findSmallest tree
-   in (show $ fst ans1, show $ fst ans2)
+      ans2 =
+        sizes
+          # filter (>= spaceNeeded)
+          # minimum
+   in (show ans1, show ans2)
