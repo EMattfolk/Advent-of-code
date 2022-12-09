@@ -10,6 +10,7 @@ import qualified Day04
 import qualified Day05
 import qualified Day06
 import qualified Day07
+import qualified Day08
 import Lib
 import System.CPUTime (getCPUTime)
 
@@ -21,7 +22,8 @@ solutions =
     Day04.solution,
     Day05.solution,
     Day06.solution,
-    Day07.solution
+    Day07.solution,
+    Day08.solution
   ]
 
 pad :: Char -> Int -> String -> String
