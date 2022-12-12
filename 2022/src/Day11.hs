@@ -2,29 +2,30 @@ module Day11 (solution) where
 
 import Data.Bifunctor (bimap)
 import qualified Data.List as List
-import Data.Map (Map)
-import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
 import Lib
+
+update :: (a -> a) -> Int -> [a] -> [a]
+update _ _ [] = []
+update f 0 (x : xs) = f x : xs
+update f i (x : xs) = x : update f (i - 1) xs
 
 data Monkey = Monkey [Int] (Int -> Int) (Int -> Int)
 
-doRound :: Map Int Monkey -> (Map Int Monkey, [Int])
-doRound state =
+doRound :: (Int -> Int) -> [Monkey] -> ([Monkey], [Int])
+doRound modifier state =
   [0 .. length state - 1]
     # foldl
       ( \(s, scores) i ->
-          Map.lookup i s
-            # fromMaybe (Monkey [] (const 0) (const 0))
+          (s !! i)
             # ( \(Monkey values changer next) ->
                   ( values
                       # foldl
                         ( \s' v ->
-                            let newV = div (changer v) 3
+                            let newV = modifier (changer v)
                              in s'
-                                  # Map.update
+                                  # update
                                     ( \(Monkey vals ch nx) ->
-                                        Just (Monkey (vals <> [newV]) ch nx)
+                                        Monkey (vals <> [newV]) ch nx
                                     )
                                     (next newV)
                         )
@@ -33,43 +34,9 @@ doRound state =
                   )
               )
             # bimap
-              ( Map.update
+              ( update
                   ( \(Monkey _ ch nx) ->
-                      Just (Monkey [] ch nx)
-                  )
-                  i
-              )
-              id
-      )
-      (state, [])
-
-doRound2 :: Map Int Monkey -> (Map Int Monkey, [Int])
-doRound2 state =
-  [0 .. length state - 1]
-    # foldl
-      ( \(s, scores) i ->
-          Map.lookup i s
-            # fromMaybe (Monkey [] (const 0) (const 0))
-            # ( \(Monkey values changer next) ->
-                  ( values
-                      # foldl
-                        ( \s' v ->
-                            let newV = mod (changer v) (2 * 3 * 5 * 7 * 11 * 13 * 17 * 19)
-                             in s'
-                                  # Map.update
-                                    ( \(Monkey vals ch nx) ->
-                                        Just (Monkey (vals <> [newV]) ch nx)
-                                    )
-                                    (next newV)
-                        )
-                        s,
-                    length values : scores
-                  )
-              )
-            # bimap
-              ( Map.update
-                  ( \(Monkey _ ch nx) ->
-                      Just (Monkey [] ch nx)
+                      Monkey [] ch nx
                   )
                   i
               )
@@ -112,39 +79,20 @@ solution input =
 
       parsed = input # lines # parse
 
-      ans1 =
-        [1 :: Int .. 20]
+      solve rounds performRound =
+        [1 :: Int .. rounds]
           # foldl
             ( \(state, activities) _ ->
-                let (s, a) = doRound state
+                let (s, a) = performRound state
                  in (s, List.zipWith (+) a activities)
             )
-            ( parsed
-                # zip [0 ..]
-                # Map.fromList,
-              List.replicate (length parsed) 0
-            )
+            (parsed, List.replicate (length parsed) 0)
           # snd
           # List.sort
           # List.reverse
           # take 2
           # product
 
-      ans2 =
-        [1 :: Int .. 10000]
-          # foldl
-            ( \(state, activities) _ ->
-                let (s, a) = doRound2 state
-                 in (s, List.zipWith (+) a activities)
-            )
-            ( parsed
-                # zip [0 ..]
-                # Map.fromList,
-              List.replicate (length parsed) 0
-            )
-          # snd
-          # List.sort
-          # List.reverse
-          # take 2
-          # product
+      ans1 = solve 20 (doRound (flip div 3))
+      ans2 = solve 10000 (doRound (flip mod (2 * 3 * 5 * 7 * 11 * 13 * 17 * 19)))
    in (show ans1, show ans2)
