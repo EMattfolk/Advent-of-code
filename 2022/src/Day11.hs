@@ -25,7 +25,7 @@ doRound modifier state =
                              in s'
                                   # update
                                     ( \(Monkey vals ch nx) ->
-                                        Monkey (vals <> [newV]) ch nx
+                                        Monkey (newV : vals) ch nx
                                     )
                                     (next newV)
                         )
