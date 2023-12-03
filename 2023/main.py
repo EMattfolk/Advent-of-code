@@ -1,13 +1,19 @@
 from importlib import import_module
 from time import process_time
+from multiprocessing import Pool
 
-for day in range(1, 26):
+
+def solve_day(day):
     day_string = f"day{day:>02}"
     try:
         m = import_module(day_string)
     except:
-        break
+        return ""
     st = process_time()
     res = m.solve(open("input/" + day_string + ".txt").read().rstrip())
     end = process_time()
-    print(f"Day {day:>2}: {(end-st)*1000:>8.3f}ms - {res[0]}, {res[1]}")
+    return f"Day {day:>2}: {(end-st)*1000:>8.3f}ms - {res[0]}, {res[1]}\n"
+
+
+with Pool(12) as p:
+    print("".join(p.map(solve_day, range(1, 26))), end="")
