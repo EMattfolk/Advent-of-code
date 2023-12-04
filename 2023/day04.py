@@ -5,13 +5,12 @@ def solve(input):
     parsed = []
     for l in input.split("\n"):
         [a, b] = l.split(": ")[1].split(" | ")
-        parsed.append((a.split(), b.split()))
+        parsed.append(len(set(a.split()).intersection(set(b.split()))))
 
     cards = [1] * len(parsed)
 
     ans1 = 0
-    for i, (a, b) in enumerate(parsed):
-        won = len(set(a).intersection(set(b)))
+    for i, won in enumerate(parsed):
         if won:
             ans1 += 2 ** (won - 1)
         for j in range(won):
