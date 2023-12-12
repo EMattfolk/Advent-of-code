@@ -22,8 +22,12 @@ def offset(c):
             return (Point(0, 1), Point(-1, 0))
 
 
+def dir(d):
+    return Point(-d.y, d.x)
+
+
 def solve(input):
-    input = input.split()
+    input = [list(l) for l in input.split()]
     for y, l in enumerate(input):
         for x, c in enumerate(l):
             if c == "S":
@@ -42,37 +46,54 @@ def solve(input):
 
     visited = loop.copy()
 
-    def fill(x, y):
-        p = Point(x, y)
-        if p in visited:
-            return set()
-
-        failed = False
-        v = {p}
-        queue = [p]
-        while queue:
-            p = queue.pop()
-            for o in [Point(-1, 0), Point(1, 0), Point(0, -1), Point(0, 1)]:
-                np = o + p
-                try:
-                    input[np.y][np.x]
-                    if np not in loop and np not in v:
-                        queue.append(np)
-                        v.add(np)
-                except:
-                    failed = True
-
-        for p in v:
-            visited.add(p)
-        if failed:
-            return set()
-        else:
-            return v
-
     ans1 = len(loop) // 2
     ans2 = 0
     for y, l in enumerate(input):
+        state = "outside"
         for x, c in enumerate(l):
-            ans2 += len(fill(x, y))
+            # input[y][x] = " "
+            if Point(x, y) in loop:
+                if state == "outside":
+                    if c == "|":
+                        state = "inside"
+                    elif c == "F":
+                        state = "down"
+                    elif c == "L":
+                        state = "up"
+                elif state == "inside":
+                    if c == "|":
+                        state = "outside"
+                    elif c == "F":
+                        state = "downi"
+                    elif c == "L":
+                        state = "upi"
+                elif state == "up":
+                    if c in ["7", "S"]:
+                        state = "inside"
+                    elif c == "J":
+                        state = "outside"
+                elif state == "down":
+                    if c == "J":
+                        state = "inside"
+                    elif c in ["7", "S"]:
+                        state = "outside"
+                elif state == "upi":
+                    if c in ["7", "S"]:
+                        state = "outside"
+                    elif c == "J":
+                        state = "inside"
+                elif state == "downi":
+                    if c == "J":
+                        state = "outside"
+                    elif c in ["7", "S"]:
+                        state = "inside"
+            elif state == "inside":
+                ans2 += 1
+
+    # for i in loop:
+    #    input[i.y][i.x] = "#"
+
+    # for l in input:
+    #    print("".join(l))
 
     return (str(ans1), str(ans2))
