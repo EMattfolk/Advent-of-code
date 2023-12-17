@@ -16,23 +16,9 @@ def bounce(dir, tile):
             else:
                 return [dir]
         case "/":
-            if dir == (1, 0):
-                return [(0, -1)]
-            elif dir == (-1, 0):
-                return [(0, 1)]
-            elif dir == (0, 1):
-                return [(-1, 0)]
-            elif dir == (0, -1):
-                return [(1, 0)]
+            return [(-dir[1], -dir[0])]
         case "\\":
-            if dir == (1, 0):
-                return [(0, 1)]
-            elif dir == (-1, 0):
-                return [(0, -1)]
-            elif dir == (0, 1):
-                return [(1, 0)]
-            elif dir == (0, -1):
-                return [(-1, 0)]
+            return [(dir[1], dir[0])]
 
 
 def solve(input):
