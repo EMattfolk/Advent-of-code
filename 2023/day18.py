@@ -1,59 +1,120 @@
 from point import Point
 
 
+def step(p, dir, next_dir):
+    match [p, dir, next_dir]:
+        # R
+        # Inner
+        case ["UR", "R", "U"]:
+            return "UL"
+        case ["DR", "R", "D"]:
+            return "DL"
+        # Outer
+        case ["UL", "R", "D"]:
+            return "UR"
+        case ["DL", "R", "U"]:
+            return "DR"
+
+        # L
+        # Inner
+        case ["UL", "L", "U"]:
+            return "UR"
+        case ["DL", "L", "D"]:
+            return "DR"
+        # Outer
+        case ["UR", "L", "D"]:
+            return "UL"
+        case ["DR", "L", "U"]:
+            return "DL"
+
+        # U
+        # Inner
+        case ["UR", "U", "R"]:
+            return "DR"
+        case ["UL", "U", "L"]:
+            return "DL"
+        # Outer
+        case ["DR", "U", "L"]:
+            return "UR"
+        case ["DL", "U", "R"]:
+            return "UL"
+
+        # D
+        # Inner
+        case ["DR", "D", "R"]:
+            return "UR"
+        case ["DL", "D", "L"]:
+            return "UL"
+        # Outer
+        case ["UR", "D", "L"]:
+            return "DR"
+        case ["UL", "D", "R"]:
+            return "DL"
+
+    return p
+
+
+def dir_value(c):
+    if c == "U":
+        return Point(0, 0)
+    elif c == "D":
+        return Point(0, 1)
+    elif c == "L":
+        return Point(0, 0)
+    elif c == "R":
+        return Point(1, 0)
+
+
+def transition(state, new_state):
+    return (
+        dir_value(new_state[0])
+        + dir_value(new_state[1])
+        - dir_value(state[0])
+        - dir_value(state[1])
+    )
+
+
 def solve(input):
     input = [l.split() for l in input.split("\n")]
-    ans2 = 0
 
-    p = Point(0, 0)
-    hole = {p}
-    for [c, dist, color] in input:
-        if c == "U":
-            dir = Point(0, -1)
-        elif c == "R":
-            dir = Point(1, 0)
-        elif c == "D":
-            dir = Point(0, 1)
-        elif c == "L":
-            dir = Point(-1, 0)
+    def solve(steps):
+        next = [steps[(i + 1) % len(steps)][0] for i in range(len(steps))]
 
-        for _ in range(int(dist)):
-            p += dir
-            hole.add(p)
+        p = Point(0, 0)
+        hole = [p]
+        state = "UL"
+        # print(state, p)
+        for [c, dist], n in zip(steps, next):
+            if c == "U":
+                dir = Point(0, -1)
+            elif c == "R":
+                dir = Point(1, 0)
+            elif c == "D":
+                dir = Point(0, 1)
+            elif c == "L":
+                dir = Point(-1, 0)
 
-    xs = [p.x for p in hole]
-    ys = [p.y for p in hole]
-    min_x, max_x = min(xs), max(xs)
-    min_y, max_y = min(ys), max(ys)
-    print(len(hole))
-    print(min_x, max_x)
-    print(min_y, max_y)
+            new_state = step(state, c, n)
+            p += transition(state, new_state)
+            state = new_state
 
-    visited = hole.copy()
-    for x in range(min_x, max_x + 1):
-        for y in range(min_x, max_x + 1):
-            inside = True
-            fill = set()
-            queue = [Point(x, y)]
-            while queue:
-                p = queue.pop()
+            p += dir.scale(int(dist))
+            hole.append(p)
 
-                if p in visited:
-                    continue
+            # print(state, p)
 
-                visited.add(p)
-                fill.add(p)
+        ans = 0
+        for i in range(len(hole)):
+            ans += (
+                hole[i].x * hole[(i + 1) % len(hole)].y
+                - hole[(i + 1) % len(hole)].x * hole[i].y
+            )
+        ans //= 2
+        return ans
 
-                if p.y < min_y or max_y < p.y or p.x < min_x or max_x < p.x:
-                    inside = False
-                    continue
-
-                for o in [Point(0, -1), Point(1, 0), Point(0, 1), Point(-1, 0)]:
-                    queue.append(p + o)
-
-            if inside:
-                hole |= fill
-
-    ans1 = len(hole)
+    ans1 = solve([[a, b] for [a, b, _] in input])
+    ans2 = solve(
+        [["RDLU"[int(color[-2])], int(color[2:-2], 16)] for [_, _, color] in input]
+    )
 
     return (str(ans1), str(ans2))
