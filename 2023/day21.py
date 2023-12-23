@@ -1,5 +1,8 @@
 from point import Point
 
+# With a little bit of help from:
+# https://github.com/villuna/aoc23/wiki/A-Geometric-solution-to-advent-of-code-2023,-day-21
+
 
 def solve(input):
     garden = [list(l) for l in input.split("\n")]
@@ -85,20 +88,40 @@ def solve(input):
     plots = {Point(0, -1)}
     for i in range(size - start.x - 1):
         plots = step(plots)
-    ans2 += len(plots) * full_gardens
+    ans2 += len(plots) * (full_gardens + 1)
 
     plots = {Point(size - 1, -1)}
     for i in range(size - start.x - 1):
         plots = step(plots)
-    ans2 += len(plots) * full_gardens
+    ans2 += len(plots) * (full_gardens + 1)
 
     plots = {Point(0, size)}
     for i in range(size - start.x - 1):
         plots = step(plots)
-    ans2 += len(plots) * full_gardens
+    ans2 += len(plots) * (full_gardens + 1)
 
     plots = {Point(size - 1, size)}
     for i in range(size - start.x - 1):
+        plots = step(plots)
+    ans2 += len(plots) * (full_gardens + 1)
+
+    plots = {Point(0, -1)}
+    for i in range(size * 2 - start.x - 1):
+        plots = step(plots)
+    ans2 += len(plots) * full_gardens
+
+    plots = {Point(size - 1, -1)}
+    for i in range(size * 2 - start.x - 1):
+        plots = step(plots)
+    ans2 += len(plots) * full_gardens
+
+    plots = {Point(0, size)}
+    for i in range(size * 2 - start.x - 1):
+        plots = step(plots)
+    ans2 += len(plots) * full_gardens
+
+    plots = {Point(size - 1, size)}
+    for i in range(size * 2 - start.x - 1):
         plots = step(plots)
     ans2 += len(plots) * full_gardens
 
