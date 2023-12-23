@@ -1,7 +1,27 @@
 from point import Point
 
 
+def negate(dir):
+    if dir == "R":
+        return "L"
+    elif dir == "L":
+        return "R"
+    elif dir == "U":
+        return "D"
+    elif dir == "D":
+        return "U"
+
+
 def step(p, dir, next_dir):
+    # if (p[1] == dir and p[0] == next_dir) or (
+    #    p[1] == negate(dir) and p[0] == negate(next_dir)
+    # ):
+    #    return p[0] + negate(p[1])
+    # if (p[0] == dir and p[1] == next_dir) or (
+    #    p[0] == negate(dir) and p[1] == negate(next_dir)
+    # ):
+    #    return negate(p[0]) + p[1]
+
     match [p, dir, next_dir]:
         # R
         # Inner
