@@ -69,8 +69,10 @@ def solve(input):
         low += l
     ans1 = high * low
 
-    for i in range(1001, 5001):
+    i = 1001
+    while not all(interesting.values()):
         press(i)
+        i += 1
 
     ans2 = 1
     for v in interesting.values():
