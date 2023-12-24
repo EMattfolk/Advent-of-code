@@ -41,14 +41,14 @@ def solve(input):
             odd = len(plots)
 
     even = len(plots)
-    print(even, odd)
+    # print(even, odd)
 
     target_steps = 26501365
 
     full_gardens = (target_steps - start.x) // size - 1  # Last is not filled
     to_go = (target_steps - start.x) % size  # 0
 
-    print(full_gardens, to_go)
+    # print(full_gardens, to_go)
 
     #     #
     #    #E#
