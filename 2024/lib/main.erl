@@ -8,4 +8,7 @@ read_input(Day) ->
     Res.
 
 
-run() -> day01:solve(read_input(1)).
+run() ->
+    [ day01:solve(read_input(1))
+    , day02:solve(read_input(2))
+    ].
