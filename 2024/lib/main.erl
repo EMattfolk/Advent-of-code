@@ -11,4 +11,5 @@ read_input(Day) ->
 run() ->
     [ day01:solve(read_input(1))
     , day02:solve(read_input(2))
+    , day03:solve(read_input(3))
     ].
