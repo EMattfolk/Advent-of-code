@@ -12,14 +12,20 @@ read_input(Day) ->
 
 
 run() ->
-    Days = [1, 2, 3],
+    {ok, Inputs} = file:list_dir(~"input"),
+    Days = lists:seq(1, length(Inputs)),
     Runner = self(),
     lists:map(fun (Day) ->
                       Module = binary_to_atom(day_string(Day)),
-                      spawn(fun() -> Runner ! {Day, Module:solve(read_input(Day))} end)
+                      spawn(fun() ->
+                                    Start = os:system_time(microsecond),
+                                    Runner ! {Day, catch Module:solve(read_input(Day)), os:system_time(microsecond) - Start}
+                            end)
               end, Days),
-    lists:map(fun (Day) ->
-                      receive
-                          {Day, Res} -> Res
-                      end
+    lists:foreach(fun (Day) ->
+                      {{Part1, Part2}, Elapsed} =
+                          receive
+                              {D, Res, E} when D == Day -> {Res, E}
+                          end,
+                      io:format("Day ~2..0B: ~8.3f ms - ~p, ~p\n", [Day, Elapsed / 1000, Part1, Part2 ])
               end, Days).
