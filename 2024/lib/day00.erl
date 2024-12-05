@@ -4,5 +4,5 @@
 
 solve(Input) ->
     { Input
-    , Input
+    , 0
     }.
