@@ -7,7 +7,7 @@ group([[A, B] | Rest]) ->
     maps:update_with(B, fun (Acc) -> [A | Acc] end, [A], group(Rest)).
 
 topo_sort(Pages, Deps) ->
-    PageSet = sets:from_list(Pages),
+    PageSet = sets:from_list(Pages, [{version, 2}]),
     {Acc, _} =
         sets:fold(
           fun (Dep, {Acc, Seen}) ->
