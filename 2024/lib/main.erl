@@ -22,7 +22,7 @@ run() ->
                                     Start = os:system_time(microsecond),
                                     Runner ! {Day, catch Module:solve(read_input(Day)), os:system_time(microsecond) - Start}
                             end),
-                      io:format("Day ~2..0B:          ms - ..., ...\n", [Day])
+                      io:format("Day ~2..0B:      ... ms - ..., ...\n", [Day])
               end, Days),
     lists:foreach(fun (_) ->
                       {{Part1, Part2}, Elapsed} =
