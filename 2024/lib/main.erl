@@ -1,6 +1,6 @@
 -module(main).
 
--export([ run/0 ]).
+-export([ run/0, run/1 ]).
 
 day_string(Day) ->
     iolist_to_binary(["day", string:pad(integer_to_binary(Day), 2, leading, ~"0")]).
@@ -10,6 +10,10 @@ read_input(Day) ->
     {ok, Res} = file:read_file(iolist_to_binary(Filename)),
     Res.
 
+
+run(Day) ->
+    Module = binary_to_atom(day_string(Day)),
+    Module:solve(read_input(Day)).
 
 run() ->
     {ok, Inputs} = file:list_dir(~"input"),
