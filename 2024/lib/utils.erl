@@ -1,7 +1,11 @@
 -module(utils).
 
--export([ ints/1, ints/2, lines/1, sections/1, grid/1, par/2, group/1 ]).
+-export([ ints/1, ints/2, lines/1, sections/1, grid/1, par/2, group/1, apply_n/3 ]).
 
+
+-doc """
+Split a string into a list of integers.
+""".
 ints(S) -> ints(S, "|, \n").
 ints(S, Sep) -> lists:map(fun binary_to_integer/1, string:lexemes(S, Sep)).
 lines(S) -> string:lexemes(S, "\n").
@@ -16,3 +20,6 @@ par(F, L) ->
 group([]) -> #{};
 group([{A, B} | Rest]) ->
     maps:update_with(A, fun (Acc) -> [B | Acc] end, [B], group(Rest)).
+
+apply_n(0, _, V) -> V;
+apply_n(N, F, V) when is_integer(N), N > 0 -> apply_n(N - 1, F, F(V)).
