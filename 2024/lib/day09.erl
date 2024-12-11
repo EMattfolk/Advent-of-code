@@ -25,13 +25,15 @@ compact_impl(Q) ->
             end
     end.
 
-compact2(L) -> compact2(L, lists:reverse(L)).
+compact2(L) -> remove_duplicates(#{}, compact2(L, lists:reverse(L))).
+compact2([File = {file, _, _} | Rest], Files) ->
+    [File | compact2(Rest, Files)];
 compact2(L, [File = {file, _, _} | Rest]) ->
     compact2(insert(L, File), Rest);
 compact2(L, [{space, _} | Rest]) ->
     compact2(L, Rest);
 compact2(L, []) ->
-    remove_duplicates(#{}, L).
+    L.
 
 insert([File = {file, _, _} | Rest], File) ->
     [File | Rest];
