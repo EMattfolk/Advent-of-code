@@ -7,7 +7,7 @@ transform({Stone, Count}) ->
     Binary = integer_to_binary(Stone),
     IsEven = byte_size(Binary) rem 2 =:= 0,
     case IsEven of
-        true -> 
+        true ->
             Half = trunc(byte_size(Binary) / 2),
             <<A:Half/binary, B:Half/binary>> = Binary,
             [{binary_to_integer(A), Count}, {binary_to_integer(B), Count}];
