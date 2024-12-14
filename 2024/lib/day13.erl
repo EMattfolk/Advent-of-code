@@ -46,5 +46,5 @@ sum_solutions([Ax, Ay, Bx, By, Px, Py | Rest]) ->
     end + sum_solutions(Rest).
 
 solve(Input) ->
-    Parsed = lists:map(fun binary_to_integer/1, string:lexemes(Input, "ButtonPrize AB:XY=+,\n")),
+    Parsed = utils:ints(Input, "ButtonPrize AB:XY=+,\n"),
     {sum_solutions(Parsed), sum_solutions(inc(Parsed))}.

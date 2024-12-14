@@ -8,7 +8,8 @@
     grid/1,
     par/2,
     group/1,
-    apply_n/3
+    apply_n/3,
+    mod/2
 ]).
 
 -doc """
@@ -41,3 +42,5 @@ group([{A, B} | Rest]) -> maps:update_with(A, fun(Acc) -> [B | Acc] end, [B], gr
 
 apply_n(0, _, V) -> V;
 apply_n(N, F, V) when is_integer(N), N > 0 -> apply_n(N - 1, F, F(V)).
+
+mod(I, M) -> (M + (I rem M)) rem M.
