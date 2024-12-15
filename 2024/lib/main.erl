@@ -21,11 +21,9 @@ run() ->
     Runner = self(),
     lists:foreach(
         fun(Day) ->
-            Module = binary_to_atom(day_string(Day)),
             spawn(fun() ->
                 Start = os:system_time(microsecond),
-                Runner !
-                    {Day, catch Module:solve(read_input(Day)), os:system_time(microsecond) - Start}
+                Runner ! {Day, catch run(Day), os:system_time(microsecond) - Start}
             end),
             io:format("Day ~2..0B:      ... ms - ..., ...\n", [Day])
         end,

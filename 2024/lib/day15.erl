@@ -37,8 +37,8 @@ push(Grid, Pos, Dir = {Dx, _}) ->
             NextPos = p:add(Pos, Dir),
             NewGrid = push(Grid, NextPos, Dir),
             case maps:get(NextPos, NewGrid) of
-                $@ -> maps:put(Pos, $., maps:put(NextPos, $O, NewGrid));
-                $. -> maps:put(Pos, $., maps:put(NextPos, $O, NewGrid));
+                $@ -> NewGrid#{Pos := $., NextPos := $O};
+                $. -> NewGrid#{Pos := $., NextPos := $O};
                 $# -> NewGrid;
                 $O -> NewGrid
             end;
@@ -51,36 +51,13 @@ push(Grid, Pos, Dir = {Dx, _}) ->
                     NewGrid = push(push(Grid, NextPos1, Dir), NextPos2, Dir),
                     case {maps:get(NextPos1, NewGrid), maps:get(NextPos2, NewGrid)} of
                         {$@, $.} ->
-                            maps:put(
-                                Pos,
-                                $.,
-                                maps:put(
-                                    Other,
-                                    $.,
-                                    maps:put(NextPos1, $[, maps:put(NextPos2, $], NewGrid))
-                                )
-                            );
+                            NewGrid#{Pos := $., Other := $., NextPos1 := $[, NextPos2 := $]};
                         {$., $@} ->
-                            maps:put(
-                                Pos,
-                                $.,
-                                maps:put(
-                                    Other,
-                                    $.,
-                                    maps:put(NextPos1, $[, maps:put(NextPos2, $], NewGrid))
-                                )
-                            );
+                            NewGrid#{Pos := $., Other := $., NextPos1 := $[, NextPos2 := $]};
                         {$., $.} ->
-                            maps:put(
-                                Pos,
-                                $.,
-                                maps:put(
-                                    Other,
-                                    $.,
-                                    maps:put(NextPos1, $[, maps:put(NextPos2, $], NewGrid))
-                                )
-                            );
+                            NewGrid#{Pos := $., Other := $., NextPos1 := $[, NextPos2 := $]};
                         _ ->
+                            % Rollback
                             Grid
                     end;
                 false ->
@@ -89,9 +66,9 @@ push(Grid, Pos, Dir = {Dx, _}) ->
                     NewGrid = push(Grid, NextPos, Dir),
                     case maps:get(NextPos, NewGrid) of
                         $@ ->
-                            maps:put(Pos, $., maps:put(Other, $[, maps:put(NextPos, $], NewGrid)));
+                            NewGrid#{Pos := $., Other := $[, NextPos := $]};
                         $. ->
-                            maps:put(Pos, $., maps:put(Other, $[, maps:put(NextPos, $], NewGrid)));
+                            NewGrid#{Pos := $., Other := $[, NextPos := $]};
                         $# ->
                             NewGrid;
                         $[ ->
@@ -107,36 +84,13 @@ push(Grid, Pos, Dir = {Dx, _}) ->
                     NewGrid = push(push(Grid, NextPos1, Dir), NextPos2, Dir),
                     case {maps:get(NextPos1, NewGrid), maps:get(NextPos2, NewGrid)} of
                         {$@, $.} ->
-                            maps:put(
-                                Pos,
-                                $.,
-                                maps:put(
-                                    Other,
-                                    $.,
-                                    maps:put(NextPos1, $], maps:put(NextPos2, $[, NewGrid))
-                                )
-                            );
+                            NewGrid#{Pos := $., Other := $., NextPos1 := $], NextPos2 := $[};
                         {$., $@} ->
-                            maps:put(
-                                Pos,
-                                $.,
-                                maps:put(
-                                    Other,
-                                    $.,
-                                    maps:put(NextPos1, $], maps:put(NextPos2, $[, NewGrid))
-                                )
-                            );
+                            NewGrid#{Pos := $., Other := $., NextPos1 := $], NextPos2 := $[};
                         {$., $.} ->
-                            maps:put(
-                                Pos,
-                                $.,
-                                maps:put(
-                                    Other,
-                                    $.,
-                                    maps:put(NextPos1, $], maps:put(NextPos2, $[, NewGrid))
-                                )
-                            );
+                            NewGrid#{Pos := $., Other := $., NextPos1 := $], NextPos2 := $[};
                         _ ->
+                            % Rollback
                             Grid
                     end;
                 false ->
@@ -145,9 +99,9 @@ push(Grid, Pos, Dir = {Dx, _}) ->
                     NewGrid = push(Grid, NextPos, Dir),
                     case maps:get(NextPos, NewGrid) of
                         $@ ->
-                            maps:put(Pos, $., maps:put(Other, $], maps:put(NextPos, $[, NewGrid)));
+                            NewGrid#{Pos := $., Other := $], NextPos := $[};
                         $. ->
-                            maps:put(Pos, $., maps:put(Other, $], maps:put(NextPos, $[, NewGrid)));
+                            NewGrid#{Pos := $., Other := $], NextPos := $[};
                         $# ->
                             NewGrid;
                         $] ->
