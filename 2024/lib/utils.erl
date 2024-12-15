@@ -9,7 +9,8 @@
     par/2,
     group/1,
     apply_n/3,
-    mod/2
+    mod/2,
+    print_grid/1
 ]).
 
 -doc """
@@ -44,3 +45,13 @@ apply_n(0, _, V) -> V;
 apply_n(N, F, V) when is_integer(N), N > 0 -> apply_n(N - 1, F, F(V)).
 
 mod(I, M) -> (M + (I rem M)) rem M.
+
+print_grid(Grid) ->
+    Width = lists:max([X || {X, _} <- maps:keys(Grid)]),
+    Height = lists:max([Y || {_, Y} <- maps:keys(Grid)]),
+    io:put_chars(
+        lists:join($\n, [
+            [maps:get({X, Y}, Grid, $\s) || X <- lists:seq(0, Width)]
+         || Y <- lists:seq(0, Height)
+        ]) ++ "\n"
+    ).
