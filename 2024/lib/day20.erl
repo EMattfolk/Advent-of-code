@@ -50,8 +50,6 @@ solve(Input) ->
     [End] = [P || {P, C} <- GridList, C =:= $E],
     Grid = (maps:from_list(GridList))#{Start := $., End := $.},
     Visited = bfs(Grid, #{}, queue:from_list([{0, Start}])),
-    % 1052793 too high
-    % 1056371 too high
     {
         lists:sum([find_faster(2, Visited, P) || P <- maps:keys(Visited)]),
         lists:sum([find_faster(20, Visited, P) || P <- maps:keys(Visited)])
