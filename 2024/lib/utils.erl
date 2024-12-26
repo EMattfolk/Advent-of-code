@@ -19,7 +19,7 @@ Split a string into a list of integers.
 ints(S) -> ints(S, "|, \n").
 ints(S, Sep) -> lists:map(fun binary_to_integer/1, string:lexemes(S, Sep)).
 lines(S) -> string:lexemes(S, "\n").
-sections(S) -> string:split(S, "\n\n").
+sections(S) -> string:split(S, "\n\n", all).
 grid(S) ->
     [
         {{X, Y}, C}
