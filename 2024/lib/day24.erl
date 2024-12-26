@@ -10,111 +10,177 @@ parse_consts([]) -> [].
 parse_combinators([A, Op, B, C | Rest]) -> [{A, Op, B, C} | parse_combinators(Rest)];
 parse_combinators([]) -> [].
 
-diffs(_, [], _) -> [];
-diffs(_, _, []) -> [];
-diffs(I, [A | Rest1], [A | Rest2]) -> diffs(I + 1, Rest1, Rest2);
-diffs(I, [_ | Rest1], [_ | Rest2]) -> [I | diffs(I + 1, Rest1, Rest2)].
+% diffs(I, [], [_ | Rest]) -> [I | diffs(I + 1, [], Rest)];
+% diffs(I, [_ | Rest], []) -> [I | diffs(I + 1, Rest, [])];
+% diffs(_, [], _) -> [];
+% diffs(_, _, []) -> [];
+% diffs(I, [A | Rest1], [A | Rest2]) -> diffs(I + 1, Rest1, Rest2);
+% diffs(I, [_ | Rest1], [_ | Rest2]) -> [I | diffs(I + 1, Rest1, Rest2)].
+%
+% do_swap(Mapping, Combinators, Swaps) ->
+%     Before = length(get_diff(Mapping)),
+%     M =
+%         case sets:to_list(Swaps) of
+%             [] -> <<"">>;
+%             L -> lists:max(L)
+%         end,
+%     case {sets:size(Swaps), Before} of
+%         {2, 0} ->
+%             erlang:display({
+%                 Swaps,
+%                 length(
+%                     get_diff(Mapping)
+%                 )
+%             }),
+%             false;
+%         {2, _} ->
+%             false;
+%         {_, 0} ->
+%             false;
+%         {_, _} ->
+%             Possible = lists:filter(
+%                 fun({N1, N2}) ->
+%                     #{N1 := {Arg1_1, Arg2_1, F1}, N2 := {Arg1_2, Arg2_2, F2}} = Mapping,
+%                     try
+%                         length(
+%                             get_diff(Mapping#{
+%                                 N2 := {Arg1_1, Arg2_1, F1}, N1 := {Arg1_2, Arg2_2, F2}
+%                             })
+%                         ) + 1 < Before
+%                     of
+%                         B -> B
+%                     catch
+%                         error:deadlock ->
+%                             false
+%                     end
+%                 end,
+%                 [
+%                     {N1, N2}
+%                  || {N1, _} <- Combinators,
+%                     {N2, _} <- Combinators,
+%                     M < N1,
+%                     N1 < N2
+%                 ]
+%             ),
+%             % erlang:display(Possible),
+%             case
+%                 lists:search(
+%                     fun({N1, N2}) ->
+%                         #{N1 := V1, N2 := V2} = Mapping,
+%                         do_swap(
+%                             Mapping#{N1 := V2, N2 := V1},
+%                             [{N, nil} || {N, _} <- Combinators, N2 < N],
+%                             Swaps#{
+%                                 N1 => [], N2 => []
+%                             }
+%                         )
+%                     end,
+%                     Possible
+%                 )
+%             of
+%                 {value, V} -> V;
+%                 false -> false
+%             end
+%     end.
+%
+% get_diff(Mapping) ->
+%     Bits1 = lists:concat(
+%         element(
+%             2,
+%             lists:foldl(
+%                 fun(Name, {Visited, Acc}) ->
+%                     {NewVisited, V} = eval(Mapping, Visited, Name),
+%                     {NewVisited, [V | Acc]}
+%                 end,
+%                 {#{}, []},
+%                 [Name || Name := _ <- maps:iterator(Mapping, reversed), binary:at(Name, 0) =:= $z]
+%             )
+%         )
+%     ),
+%     Bits2 = lists:reverse(
+%         integer_to_list(
+%             list_to_integer(
+%                 lists:concat([
+%                     V
+%                  || Name := V <- maps:iterator(Mapping, reversed), binary:at(Name, 0) =:= $x
+%                 ]),
+%                 2
+%             ) +
+%                 list_to_integer(
+%                     lists:concat([
+%                         V
+%                      || Name := V <- maps:iterator(Mapping, reversed), binary:at(Name, 0) =:= $y
+%                     ]),
+%                     2
+%                 ),
+%             2
+%         )
+%     ),
+%     lists:map(fun(I) -> I end, diffs(0, Bits1, Bits2)).
 
-do_swap(Mapping, Combinators) ->
-    Before = length(get_diff(Mapping, Combinators)),
-    Pids = [{N, P} || N := {_, _, P} <- Combinators],
-    {value, Swapped} = lists:search(
-        fun({{N1, P1}, {N2, P2}}) ->
-            #{N1 := {Arg1_1, Arg2_1, P1}, N2 := {Arg1_2, Arg2_2, P2}} = Combinators,
-            length(
-                get_diff(Mapping, Combinators#{
-                    N1 := {Arg1_1, Arg2_1, P2}, N2 := {Arg1_2, Arg2_2, P1}
-                })
-            ) < Before
-        end,
-        [{{N1, P1}, {N2, P2}} || {N1, P1} <- Pids, {N2, P2} <- Pids, P1 < P2]
-    ),
-    Swapped.
-
-has_cycles(Mapping, Combinators, Visited, P) ->
-    sets:is_element(P, Visited).
-
-get_diff(Mapping, Combinators) ->
-    maps:foreach(
-        fun(_, {Arg1, Arg2, Pid}) ->
-            gen_server:call(Pid, {set, [maps:get(Arg1, Mapping), maps:get(Arg2, Mapping)]})
-        end,
-        Combinators
-    ),
-    Bits1 = lists:concat([
-        gen_server:call(Pid, get)
-     || Name := Pid <- maps:iterator(Mapping, ordered), binary:at(Name, 0) =:= $z
-    ]),
-    Bits2 = lists:reverse(
-        integer_to_list(
-            list_to_integer(
-                lists:concat([
-                    gen_server:call(Pid, get)
-                 || Name := Pid <- maps:iterator(Mapping, reversed), binary:at(Name, 0) =:= $x
-                ]),
-                2
-            ) +
-                list_to_integer(
-                    lists:concat([
-                        gen_server:call(Pid, get)
-                     || Name := Pid <- maps:iterator(Mapping, reversed), binary:at(Name, 0) =:= $y
-                    ]),
-                    2
-                ),
-            2
-        )
-    ),
-    lists:map(fun(I) -> I end, diffs(0, Bits1, Bits2)).
+eval(Mapping, Visited, Name) ->
+    case maps:get(Name, Visited, false) of
+        pending ->
+            error(deadlock);
+        false ->
+            case maps:get(Name, Mapping) of
+                {Arg1, Arg2, F} ->
+                    {Visited1, V1} = eval(Mapping, Visited#{Name => pending}, Arg1),
+                    {Visited2, V2} = eval(Mapping, Visited1, Arg2),
+                    V = F(V1, V2),
+                    {Visited2#{Name := V}, V};
+                V ->
+                    {Visited#{Name => V}, V}
+            end;
+        V ->
+            {Visited, V}
+    end.
 
 solve(Input) ->
     [A, B] = utils:sections(Input),
-    Consts = lists:map(
-        fun({Name, V}) ->
-            {ok, Pid} = gen_server:start_link(?MODULE, fun([]) -> V end, []),
-            {Name, Pid}
-        end,
-        parse_consts(string:lexemes(A, "\n :"))
-    ),
+    Consts = parse_consts(string:lexemes(A, "\n :")),
     Combinators = lists:map(
         fun({Arg1, Op, Arg2, Name}) ->
-            {ok, Pid} = gen_server:start_link(
-                ?MODULE,
-                case Op of
-                    ~"AND" -> fun([X, Y]) -> X band Y end;
-                    ~"XOR" -> fun([X, Y]) -> X bxor Y end;
-                    ~"OR" -> fun([X, Y]) -> X bor Y end
-                end,
-                []
-            ),
-            {Name, {Arg1, Arg2, Pid}}
+            {Name,
+                {Arg1, Arg2,
+                    case Op of
+                        ~"AND" -> fun(X, Y) -> X band Y end;
+                        ~"XOR" -> fun(X, Y) -> X bxor Y end;
+                        ~"OR" -> fun(X, Y) -> X bor Y end
+                    end}}
         end,
         parse_combinators(string:lexemes(B, "\n ->"))
     ),
-    Mapping = maps:from_list(
-        Consts ++
-            lists:map(
-                fun({Name, {_, _, Pid}}) ->
-                    {Name, Pid}
+    Mapping = maps:from_list(Consts ++ Combinators),
+    Bits1 = lists:concat(
+        element(
+            2,
+            lists:foldl(
+                fun(Name, {Visited, Acc}) ->
+                    {NewVisited, V} = eval(Mapping, Visited, Name),
+                    {NewVisited, [V | Acc]}
                 end,
-                Combinators
+                {#{}, []},
+                [Name || Name := _ <- maps:iterator(Mapping, ordered), binary:at(Name, 0) =:= $z]
             )
+        )
     ),
-    lists:foreach(
-        fun({_, {Arg1, Arg2, Pid}}) ->
-            gen_server:call(Pid, {set, [maps:get(Arg1, Mapping), maps:get(Arg2, Mapping)]})
-        end,
-        Combinators
-    ),
-    Bits1 = lists:concat([
-        gen_server:call(Pid, get)
-     || Name := Pid <- maps:iterator(Mapping, ordered), binary:at(Name, 0) =:= $z
-    ]),
-    %do_swap(Mapping, maps:from_list(Combinators)),
-    P2 = 1,
-    maps:foreach(fun(_, Pid) -> gen_server:stop(Pid) end, Mapping),
+    % #{~"gpr" := V1, ~"z10" := V2, ~"nks" := V3, ~"z21" := V4, ~"ghp" := V5, ~"z33" := V6} = Mapping,
     {
-        list_to_integer(lists:reverse(Bits1), 2),
-        P2
+        list_to_integer(Bits1, 2),
+        lists:concat(
+            lists:join(",", lists:sort(["gpr", "z10", "nks", "z21", "ghp", "z33", "krs", "cpm"]))
+        )
+        % do_swap(
+        %     Mapping#{
+        %         ~"gpr" := V2, ~"z10" := V1, ~"nks" := V4, ~"z21" := V3, ~"ghp" := V6, ~"z33" := V5
+        %     },
+        %     Combinators,
+        %     #{}
+        % )
+        % get_diff(Mapping#{
+        %     ~"gpr" := V2, ~"z10" := V1, ~"nks" := V4, ~"z21" := V3, ~"ghp" := V6, ~"z33" := V5
+        % })
     }.
 
 init(Combiner) ->
