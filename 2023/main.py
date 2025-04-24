@@ -16,4 +16,5 @@ def solve_day(day):
 
 
 with Pool(12) as p:
-    print("".join(p.map(solve_day, range(1, 26))), end="")
+    for res in p.imap(solve_day, range(1, 26)):
+        print(res, end="")
