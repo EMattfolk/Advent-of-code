@@ -6,7 +6,7 @@ defmodule Aoc do
   def main() do
     IO.puts("")
 
-    1..1
+    1..2
     |> Task.async_stream(fn day ->
       padded =
         case day < 10 do
