@@ -2,7 +2,7 @@ const std = @import("std");
 const lib = @import("lib.zig");
 
 pub fn solve(input: []const u8) !struct { []u8, []u8 } {
-    var it = std.mem.splitScalar(u8, std.mem.trim(u8, input, "\n"), '\n');
+    var it = lib.lines(input);
     var dial1: i32 = 50;
     var pass1: i32 = 0;
     var dial2: i32 = 50;
