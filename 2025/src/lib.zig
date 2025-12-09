@@ -20,3 +20,20 @@ pub fn lines(input: []const u8) std.mem.SplitIterator(u8, .sequence) {
 pub fn splitAny(input: []const u8, delims: []const u8) std.mem.SplitIterator(u8, .any) {
     return std.mem.splitAny(u8, std.mem.trim(u8, input, delims), delims);
 }
+
+pub const Point = struct { x: isize, y: isize };
+
+pub fn grid(input: []const u8) !std.hash_map.AutoHashMap(Point, u8) {
+    var g = std.hash_map.AutoHashMap(Point, u8).init(a);
+    var it = lines(input);
+    var y: isize = 0;
+    while (it.next()) |line| {
+        var x: isize = 0;
+        for (line) |c| {
+            try g.put(.{ .x = x, .y = y }, c);
+            x += 1;
+        }
+        y += 1;
+    }
+    return g;
+}
