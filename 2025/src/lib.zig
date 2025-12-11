@@ -17,6 +17,10 @@ pub fn lines(input: []const u8) std.mem.SplitIterator(u8, .sequence) {
     return std.mem.splitSequence(u8, input, "\n");
 }
 
+pub fn sections(input: []const u8) std.mem.SplitIterator(u8, .sequence) {
+    return std.mem.splitSequence(u8, input, "\n\n");
+}
+
 pub fn splitAny(input: []const u8, delims: []const u8) std.mem.SplitIterator(u8, .any) {
     return std.mem.splitAny(u8, std.mem.trim(u8, input, delims), delims);
 }
