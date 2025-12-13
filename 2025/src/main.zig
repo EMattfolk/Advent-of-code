@@ -7,11 +7,16 @@ const day03 = @import("day03.zig");
 const day04 = @import("day04.zig");
 const day05 = @import("day05.zig");
 const day06 = @import("day06.zig");
+const day07 = @import("day07.zig");
 
 var res: [12]struct { []const u8, []const u8 } = undefined;
+var timing: [12]u64 = undefined;
 
 fn runDay(day: usize, f: anytype, input: []const u8) !void {
+    const st = try std.time.Instant.now();
     res[day - 1] = try f(input);
+    const end = try std.time.Instant.now();
+    timing[day - 1] = end.since(st);
 }
 
 pub fn main() !void {
@@ -29,6 +34,8 @@ pub fn main() !void {
     var t5 = try std.Thread.spawn(.{}, runDay, .{ 5, day05.solve, buf });
     buf = try lib.readFile("input/day06.txt");
     var t6 = try std.Thread.spawn(.{}, runDay, .{ 6, day06.solve, buf });
+    buf = try lib.readFile("input/day07.txt");
+    var t7 = try std.Thread.spawn(.{}, runDay, .{ 7, day07.solve, buf });
 
     t1.join();
     t2.join();
@@ -36,6 +43,7 @@ pub fn main() !void {
     t4.join();
     t5.join();
     t6.join();
+    t7.join();
 
     std.debug.print("Day  1: {s}, {s}\n", res[1 - 1]);
     std.debug.print("Day  2: {s}, {s}\n", res[2 - 1]);
@@ -43,4 +51,5 @@ pub fn main() !void {
     std.debug.print("Day  4: {s}, {s}\n", res[4 - 1]);
     std.debug.print("Day  5: {s}, {s}\n", res[5 - 1]);
     std.debug.print("Day  6: {s}, {s}\n", res[6 - 1]);
+    std.debug.print("Day  7: {s}, {s}\n", res[7 - 1]);
 }
