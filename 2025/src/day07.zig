@@ -1,9 +1,11 @@
 const std = @import("std");
 const lib = @import("lib.zig");
 
-// low 5224
+pub fn solve(input: []const u8) struct { []u8, []u8 } {
+    return solve_impl(input) catch .{ @constCast("error"), @constCast("error") };
+}
 
-pub fn solve(input: []const u8) !struct { []u8, []u8 } {
+fn solve_impl(input: []const u8) !struct { []u8, []u8 } {
     var ans1: i64 = 0;
     var ans2: i64 = 0;
     var lines: std.ArrayList([]const u8) = .empty;

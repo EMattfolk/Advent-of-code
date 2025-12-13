@@ -1,55 +1,36 @@
 const std = @import("std");
 const lib = @import("lib.zig");
 
-const day01 = @import("day01.zig");
-const day02 = @import("day02.zig");
-const day03 = @import("day03.zig");
-const day04 = @import("day04.zig");
-const day05 = @import("day05.zig");
-const day06 = @import("day06.zig");
-const day07 = @import("day07.zig");
-
 var res: [12]struct { []const u8, []const u8 } = undefined;
 var timing: [12]u64 = undefined;
+var threads: [12]std.Thread = undefined;
 
-fn runDay(day: usize, f: anytype, input: []const u8) !void {
+const fns = [_](*const fn ([]const u8) struct { []u8, []u8 }){ @import("day01.zig").solve, @import("day02.zig").solve, @import("day03.zig").solve, @import("day04.zig").solve, @import("day05.zig").solve, @import("day06.zig").solve, @import("day07.zig").solve };
+
+fn runDay(day: usize, input: []const u8) !void {
     const st = try std.time.Instant.now();
-    res[day - 1] = try f(input);
+    res[day - 1] = fns[day - 1](input);
     const end = try std.time.Instant.now();
     timing[day - 1] = end.since(st);
 }
 
 pub fn main() !void {
-    var buf: []const u8 = "";
+    const days: usize = fns.len;
 
-    buf = try lib.readFile("input/day01.txt");
-    var t1 = try std.Thread.spawn(.{}, runDay, .{ 1, day01.solve, buf });
-    buf = try lib.readFile("input/day02.txt");
-    var t2 = try std.Thread.spawn(.{}, runDay, .{ 2, day02.solve, buf });
-    buf = try lib.readFile("input/day03.txt");
-    var t3 = try std.Thread.spawn(.{}, runDay, .{ 3, day03.solve, buf });
-    buf = try lib.readFile("input/day04.txt");
-    var t4 = try std.Thread.spawn(.{}, runDay, .{ 4, day04.solve, buf });
-    buf = try lib.readFile("input/day05.txt");
-    var t5 = try std.Thread.spawn(.{}, runDay, .{ 5, day05.solve, buf });
-    buf = try lib.readFile("input/day06.txt");
-    var t6 = try std.Thread.spawn(.{}, runDay, .{ 6, day06.solve, buf });
-    buf = try lib.readFile("input/day07.txt");
-    var t7 = try std.Thread.spawn(.{}, runDay, .{ 7, day07.solve, buf });
+    var fileName: []u8 = @constCast("input/day00.txt");
 
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
-    t5.join();
-    t6.join();
-    t7.join();
+    for (1..days + 1) |day| {
+        fileName[9] = '0' + (@as(u8, @intCast(day)) / 10);
+        fileName[10] = '0' + @as(u8, @intCast(day)) % 10;
+        const buf = try lib.readFile(fileName);
+        threads[day - 1] = try std.Thread.spawn(.{}, runDay, .{ day, buf });
+    }
 
-    std.debug.print("Day  1: {s}, {s}\n", res[1 - 1]);
-    std.debug.print("Day  2: {s}, {s}\n", res[2 - 1]);
-    std.debug.print("Day  3: {s}, {s}\n", res[3 - 1]);
-    std.debug.print("Day  4: {s}, {s}\n", res[4 - 1]);
-    std.debug.print("Day  5: {s}, {s}\n", res[5 - 1]);
-    std.debug.print("Day  6: {s}, {s}\n", res[6 - 1]);
-    std.debug.print("Day  7: {s}, {s}\n", res[7 - 1]);
+    for (1..days + 1) |day| {
+        threads[day - 1].join();
+        const d1 = @as(u8, @intCast(day)) / 10;
+        const d2 = @as(u8, @intCast(day)) % 10;
+        const ans1, const ans2 = res[day - 1];
+        std.debug.print("Day {c}{}: {} ms - {s}, {s}\n", .{ if (d1 == 0) ' ' else d1, d2, timing[day - 1] / 1000_000, ans1, ans2 });
+    }
 }

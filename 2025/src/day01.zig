@@ -1,7 +1,11 @@
 const std = @import("std");
 const lib = @import("lib.zig");
 
-pub fn solve(input: []const u8) !struct { []u8, []u8 } {
+pub fn solve(input: []const u8) struct { []u8, []u8 } {
+    return solve_impl(input) catch .{ @constCast("error"), @constCast("error") };
+}
+
+fn solve_impl(input: []const u8) !struct { []u8, []u8 } {
     var it = lib.lines(input);
     var dial1: i32 = 50;
     var pass1: i32 = 0;

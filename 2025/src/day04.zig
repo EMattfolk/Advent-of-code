@@ -3,7 +3,11 @@ const lib = @import("lib.zig");
 
 const adj = [_](struct { x: i8, y: i8 }){ .{ .x = -1, .y = -1 }, .{ .x = -1, .y = 0 }, .{ .x = -1, .y = 1 }, .{ .x = 0, .y = -1 }, .{ .x = 0, .y = 1 }, .{ .x = 1, .y = -1 }, .{ .x = 1, .y = 0 }, .{ .x = 1, .y = 1 } };
 
-pub fn solve(input: []const u8) !struct { []u8, []u8 } {
+pub fn solve(input: []const u8) struct { []u8, []u8 } {
+    return solve_impl(input) catch .{ @constCast("error"), @constCast("error") };
+}
+
+fn solve_impl(input: []const u8) !struct { []u8, []u8 } {
     var ans1: i64 = 0;
     var ans2: i64 = 0;
     const grid = try lib.grid(input);

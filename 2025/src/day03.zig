@@ -18,7 +18,11 @@ fn joltage(line: []const u8, res: u64, toGo: usize) u64 {
     return joltage(line[maxi + 1 ..], res * 10 + @as(u64, maxc - '0'), toGo - 1);
 }
 
-pub fn solve(input: []const u8) !struct { []u8, []u8 } {
+pub fn solve(input: []const u8) struct { []u8, []u8 } {
+    return solve_impl(input) catch .{ @constCast("error"), @constCast("error") };
+}
+
+fn solve_impl(input: []const u8) !struct { []u8, []u8 } {
     var ans1: u64 = 0;
     var ans2: u64 = 0;
     var parsed = lib.lines(input);
