@@ -16,6 +16,7 @@ const fns = [_](*const fn ([]const u8) struct { []u8, []u8 })
     , @import("day07.zig").solve
     , @import("day08.zig").solve
     , @import("day09.zig").solve
+    , @import("day10.zig").solve
     };
 // zig fmt: on
 
@@ -43,6 +44,6 @@ pub fn main() !void {
         const d1 = @as(u8, @intCast(day)) / 10;
         const d2 = @as(u8, @intCast(day)) % 10;
         const ans1, const ans2 = res[day - 1];
-        std.debug.print("Day {c}{}: {} ms - {s}, {s}\n", .{ if (d1 == 0) ' ' else d1, d2, timing[day - 1] / 1000_000, ans1, ans2 });
+        std.debug.print("Day {c}{}: {} ms - {s}, {s}\n", .{ if (d1 == 0) ' ' else '0' + d1, d2, timing[day - 1] / 1000_000, ans1, ans2 });
     }
 }
