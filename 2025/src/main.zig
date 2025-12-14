@@ -5,7 +5,19 @@ var res: [12]struct { []const u8, []const u8 } = undefined;
 var timing: [12]u64 = undefined;
 var threads: [12]std.Thread = undefined;
 
-const fns = [_](*const fn ([]const u8) struct { []u8, []u8 }){ @import("day01.zig").solve, @import("day02.zig").solve, @import("day03.zig").solve, @import("day04.zig").solve, @import("day05.zig").solve, @import("day06.zig").solve, @import("day07.zig").solve, @import("day08.zig").solve };
+// zig fmt: off
+const fns = [_](*const fn ([]const u8) struct { []u8, []u8 })
+    { @import("day01.zig").solve
+    , @import("day02.zig").solve
+    , @import("day03.zig").solve
+    , @import("day04.zig").solve
+    , @import("day05.zig").solve
+    , @import("day06.zig").solve
+    , @import("day07.zig").solve
+    , @import("day08.zig").solve
+    , @import("day09.zig").solve
+    };
+// zig fmt: on
 
 fn runDay(day: usize, input: []const u8) !void {
     const st = try std.time.Instant.now();
