@@ -82,5 +82,5 @@ fn solve_impl(input: []const u8) !struct { []u8, []u8 } {
 
     const ans2 = (try std.process.Child.run(.{ .allocator = lib.a, .argv = &[_][]const u8{ "python", "src/day10.py" } })).stdout;
 
-    return .{ try lib.intToString(ans1), ans2 };
+    return .{ try lib.intToString(ans1), ans2[0 .. ans2.len - 1] };
 }

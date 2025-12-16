@@ -17,6 +17,7 @@ const fns = [_](*const fn ([]const u8) struct { []u8, []u8 })
     , @import("day08.zig").solve
     , @import("day09.zig").solve
     , @import("day10.zig").solve
+    , @import("day11.zig").solve
     };
 // zig fmt: on
 
